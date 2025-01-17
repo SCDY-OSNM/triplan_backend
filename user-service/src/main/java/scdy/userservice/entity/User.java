@@ -14,13 +14,16 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;
+    private Long userId;
 
     @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String phoneNumber;
 
     @Column(nullable = false)
     private String nickname;
@@ -33,27 +36,34 @@ public class User {
     private UserRole userRole;
 
     @Column(nullable = true, unique = true)
-    private Long kakaoId;
+    private String kakaoId;
 
     public void deleteAccount() {
         this.isDelete = true;
     }
 
     @Builder
-    public User(String email, String password, String nickname, UserRole userRole, Long kakaoId) {
+    public User(String email,
+                String password,
+                String phoneNumber,
+                String nickname,
+                UserRole userRole,
+                String kakaoId) {
         this.email = email;
         this.password = password;
+        this.phoneNumber = phoneNumber;
         this.nickname = nickname;
         this.userRole = userRole;
         this.kakaoId = kakaoId;
     }
+
 
     public void updateUser(String password, String nickname) {
         this.password = password;
         this.nickname = nickname;
     }
 
-    public void updateKakaoId(Long kakaoId) {
+    public void updateKakaoId(String kakaoId) {
         this.kakaoId = kakaoId;
     }
 

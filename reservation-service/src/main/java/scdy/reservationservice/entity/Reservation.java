@@ -49,9 +49,11 @@ public class Reservation {
 
 
     public void updateReservation(
+            Long planDetailId,
             LocalDateTime reservationStartAt,
             LocalDateTime reservationEndAt,
             ReservationStatus reservationStatus) {
+        this.planDetailId = planDetailId;
         this.reservationStartAt = reservationStartAt;
         this.reservationEndAt = reservationEndAt;
         this.reservationStatus = reservationStatus;
