@@ -4,7 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import scdy.userservice.common.advice.ErrorResponse;
+import scdy.reservationservice.common.exceptions.*;
+import scdy.reservationservice.common.advice.ErrorResponse;
 
 @RestControllerAdvice
 public class ControllerAdvice {

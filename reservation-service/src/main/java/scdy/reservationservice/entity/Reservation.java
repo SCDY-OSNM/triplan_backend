@@ -58,4 +58,20 @@ public class Reservation {
         this.reservationEndAt = reservationEndAt;
         this.reservationStatus = reservationStatus;
     }
+
+    public void updateReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
+
+    public void makeReservation(Long userId){
+        this.userId = userId;
+        this.reservationStatus = ReservationStatus.WAITING;
+    }
+
+    public void cancelReservation(){
+        this.userId = null;
+        this.reservationStatus = ReservationStatus.NOT_RESERVED;
+    }
+
+
 }

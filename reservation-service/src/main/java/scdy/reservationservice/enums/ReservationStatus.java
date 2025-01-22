@@ -2,7 +2,10 @@ package scdy.reservationservice.enums;
 
 public enum ReservationStatus {
     NOT_RESERVED,
+    NOT_AVAILABLE,
     WAITING,
     APPROVED,
-    RESERVED
+    REJECTED,
+    CANCELED,
+    RESERVED,
 }
