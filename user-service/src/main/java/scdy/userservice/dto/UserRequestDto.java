@@ -19,4 +19,6 @@ public class UserRequestDto {
 
     private UserRole userRole;
 
+    private String phoneNumber;
+
 }

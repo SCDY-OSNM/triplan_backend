@@ -43,6 +43,7 @@ public class UserService {
                 .password(password)
                 .nickname(userRequestDto.getNickname())
                 .userRole(role)
+                .phoneNumber(userRequestDto.getPhoneNumber())
                 .build();
         user = userRepository.save(user);
         return UserResponseDto.from(user);
