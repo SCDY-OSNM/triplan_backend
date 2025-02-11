@@ -12,7 +12,7 @@ import scdy.reservationservice.dto.ReservationRequestDto;
 import scdy.reservationservice.dto.ReservationResponseDto;
 import scdy.reservationservice.dto.UserResponseDto;
 import scdy.reservationservice.entity.Reservation;
-import scdy.reservationservice.enums.ReservationStatus;
+import scdy.reservationservice.entity.enums.ReservationStatus;
 import scdy.reservationservice.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
@@ -36,11 +36,8 @@ public class ReservationService {
         ContentsResponseDto contents = contentsClient.getContentsById(reservationRequestDto.getContentsId()).getData();
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner))){
+        //생성 시에는 사용자 확인 불필요
+        if (!checkUserPermission(user, contents, null)) {
             throw new BadRequestException("권한이 없는 사용자입니다.");
         }
 
@@ -66,11 +63,8 @@ public class ReservationService {
         ContentsResponseDto contents = contentsClient.getContentsById(reservationRequestDto.getContentsId()).getData();
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner))){
+        //수정 시 예약 사용자 확인 불필요
+        if (!checkUserPermission(user, contents, null)) {
             throw new BadRequestException("권한이 없는 사용자입니다.");
         }
 
@@ -91,12 +85,7 @@ public class ReservationService {
         ContentsResponseDto contents = contentsClient.getContentsById(reservationRequestDto.getContentsId()).getData();
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-        boolean isReservedUser = reservation.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner) || isReservedUser)){
+        if (!checkUserPermission(user, contents, reservation.getUserId())) {
             throw new BadRequestException("권한이 없는 사용자입니다.");
         }
 
@@ -112,13 +101,11 @@ public class ReservationService {
 
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner))){
+        // 목록 조회 시에는 예약 사용자 확인 불필요
+        if (!checkUserPermission(user, contents, null)) {
             throw new BadRequestException("권한이 없는 사용자입니다.");
         }
+
 
         List<Reservation> reservationList = reservationRepository.getReservationListByContentsId(reservation.getContentsId());
 
@@ -134,10 +121,7 @@ public class ReservationService {
         UserResponseDto user = userClient.getUserById(userId).getData();
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isUserMatched = reservationRequestDto.getUserId().equals(userId);
-
-        if(!(isAdmin || (isUserMatched))) {
+        if (!checkUserPermission(user, null, reservationRequestDto.getUserId())) { // contents 필요없음
             throw new BadRequestException("권한이 없는 사용자입니다");
         }
 
@@ -153,7 +137,7 @@ public class ReservationService {
         LocalDateTime startOfDay = dto.getReservationStartAt().toLocalDate().atStartOfDay();
         ContentsResponseDto contents = contentsClient.getContentsById(dto.getContentsId()).getData();
 
-        List<Reservation> reservationList = reservationRepository.findAllByResDateAndContentsId(
+        List<Reservation> reservationList = reservationRepository.findAllByReservationDateAndContentsId(
                 startOfDay,
                 startOfDay.plusDays(1),
                 contents.getContentsId()
@@ -174,11 +158,7 @@ public class ReservationService {
         ContentsResponseDto contents = contentsClient.getContentsById(reservationRequestDto.getContentsId()).getData();
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner))){
+        if (!checkUserPermission(user, contents, null)) {
             throw new BadRequestException("권한이 없는 사용자입니다.");
         }
 
@@ -201,6 +181,10 @@ public class ReservationService {
     public ReservationResponseDto makeReservation(ReservationRequestDto reservationRequestDto, Long userId) {
         UserResponseDto user = userClient.getUserById(userId).getData();
         Reservation reservation = reservationRepository.findByIdOrElseThrow(reservationRequestDto.getReservationId());
+
+        if (!checkUserPermission(user, null, reservation.getUserId())) { // 예약 신청자는 본인인지 확인
+            throw new BadRequestException("권한이 없는 사용자입니다.");
+        }
 
         //Check the availability of reservation
         if( !reservation.getReservationStatus().equals(ReservationStatus.NOT_RESERVED)) {
@@ -233,12 +217,7 @@ public class ReservationService {
         }
 
         //check user
-        boolean isAdmin = user.getUserRole().equals("ADMIN");
-        boolean isHost = user.getUserRole().equals("HOST");
-        boolean isOwner = contents.getUserId().equals(userId);
-        boolean isMatchedUser = reservation.getUserId().equals(userId);
-
-        if(!(isAdmin || (isHost && isOwner) || isMatchedUser)) {
+        if (!checkUserPermission(user, contents, reservation.getUserId())) {
             throw new BadRequestException("취소 권한이 없는 사용자입니다.");
         }
 
@@ -253,4 +232,13 @@ public class ReservationService {
 
     //Reservation Batch Func
 
+
+    private boolean checkUserPermission(UserResponseDto user, ContentsResponseDto contents, Long reservationUserId) {
+        boolean isAdmin = user.getUserRole().equals("ADMIN");
+        boolean isHost = user.getUserRole().equals("HOST");
+        boolean isOwner = contents.getUserId().equals(user.getUserId()); // user id와 contents의 user id 비교
+        boolean isReservedUser = reservationUserId.equals(user.getUserId());
+
+        return isAdmin || (isHost && isOwner) || isReservedUser;
+    }
 }

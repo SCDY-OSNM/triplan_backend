@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import scdy.reservationservice.entity.Reservation;
-import scdy.reservationservice.enums.ReservationStatus;
+import scdy.reservationservice.entity.enums.ReservationStatus;
 
 import java.time.LocalDateTime;
 

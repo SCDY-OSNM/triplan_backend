@@ -25,7 +25,8 @@ public class ReservationController {
     }
 
     //예약 수정
-    @PutMapping()
+    //일부만 수정할 수 있도록 PATCH 사용
+    @PatchMapping()
     public ResponseEntity<ApiResponse<ReservationResponseDto>> updateReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                  @RequestBody ReservationRequestDto dto){
         ReservationResponseDto responseDto = reservationService.updateReservation(dto, userId);
