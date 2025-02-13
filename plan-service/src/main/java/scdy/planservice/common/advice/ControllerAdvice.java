@@ -1,12 +1,11 @@
 package scdy.planservice.common.advice;
 
 
-import crane.reservationservice.common.exceptions.*;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import scdy.planservice.common.exceptions.*;
 
 @RestControllerAdvice
 public class ControllerAdvice {

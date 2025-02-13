@@ -26,6 +26,8 @@ public class PlanService {
     private final PlanPlaceRepository planPlaceRepository;
     private final MemberRepository memberRepository;
 
+    private final MemberService memberService;
+
     private final UserClient userClient;
 
 
@@ -41,6 +43,8 @@ public class PlanService {
                 .planPlace(planRequestDto.getPlanPlace())
                 .build();
         planRepository.save(plan);
+
+        memberService.createLeader(userId, plan); // 서비스 내에서 서비스를 호출해도 괜찮은지
 
         return PlanResponseDto.from(plan);
     }
@@ -71,7 +75,7 @@ public class PlanService {
     @Transactional
     public PlanResponseDto updatePlan(Long planId, PlanRequestDto planRequestDto, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
-        if(memberRepository.findByUserIdAndPlanId(planId, userId).isEmpty()) {
+        if(memberRepository.findByUserIdPlanId(planId, userId).isEmpty()) {
             throw new BadRequestException("수정 권한이 없습니다.");
         }
         plan.updatePlan(planRequestDto.getPlanTitle(), planRequestDto.getPlanStartAt(), planRequestDto.getPlanEndAt(), planRequestDto.getPlanPlace());
@@ -83,7 +87,7 @@ public class PlanService {
     @Transactional
     public PlanResponseDto deletePlan(Long planId, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
-        Member member = memberRepository.findByUserIdAndPlanId(userId, planId).orElseThrow(
+        Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
                 () -> new NotFoundException("Member Not Exist"));
 
         if(!checkLeader(userId, planId)) {
@@ -96,7 +100,7 @@ public class PlanService {
     // 현재 사용자 별 일정 목록 (공/비공 고려x)
     public List<PlanResponseDto> readMyPlan(Long userId){
         UserResponseDto user = userClient.getUserById(userId).getData();
-        List<Plan> planList = planRepository.findByUserId(userId);
+        List<Plan> planList = planRepository.findByUserIdInMember(userId);
         return planList.stream().map(PlanResponseDto::from).toList();
     }
 
@@ -121,8 +125,9 @@ public class PlanService {
     public List<PlanResponseDto> readPlanByPlace(Place place){
         List<Plan> planList = planRepository.findByPlace(place);
 
-        return planList.stream().map(PlanResponseDto::from).toList();
-    } // 비공개일 경우 안 뜨게 해야됨
+        return planList.stream()
+                .filter(plan-> !plan.getIsPublic()).map(PlanResponseDto::from).toList();
+    }
 
     // 지역별 일정 목록 - PlanPlace 테이블 사용
     public List<PlanResponseDto> readPlanByPlace2(Place place){
@@ -130,8 +135,9 @@ public class PlanService {
 
         List<Plan> planList = planPlaceList.stream().map(planPlace -> planRepository.findByIdOrElseThrow(planPlace.getPlanId())).toList();
 
-        return planList.stream().map(PlanResponseDto::from).toList();
-    } // 비공개일 경우 안 뜨게 해야됨
+        return planList.stream()
+                .filter(plan-> !plan.getIsPublic()).map(PlanResponseDto::from).toList();
+    }
 
     // 일정 공유
 
@@ -140,11 +146,11 @@ public class PlanService {
         if(plan.getIsPublic()){
             return true;
         }
-        return memberRepository.findByUserIdAndPlanId(userId, planId).isPresent();
+        return memberRepository.findByUserIdPlanId(userId, planId).isPresent();
     }
 
     private boolean checkLeader(Long userId, Long planId){
-        Member member = memberRepository.findByUserIdAndPlanId(userId, planId).orElseThrow(
+        Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
                 ()-> new NotFoundException("Member Not Found"));
         if(member.getMemberRole()== MemberRole.LEADER) {
             return true;

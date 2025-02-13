@@ -9,6 +9,7 @@ import scdy.planservice.common.advice.ApiResponse;
 import scdy.planservice.dto.PlanRequestDto;
 import scdy.planservice.dto.PlanResponseDto;
 import scdy.planservice.enums.Place;
+import scdy.planservice.service.MemberService;
 import scdy.planservice.service.PlanService;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequestMapping("api/v1/plans")
 public class PlanController {
     private final PlanService planService;
+    private final MemberService memberService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PlanResponseDto>> createPlan(@RequestHeader("X-Authenticated-User") Long userId, @RequestBody PlanRequestDto planRequestDto){
@@ -57,6 +59,4 @@ public class PlanController {
     // 지역별 일정 목록 조회
 
     // 일정 공유 (url)
-
-
 }
