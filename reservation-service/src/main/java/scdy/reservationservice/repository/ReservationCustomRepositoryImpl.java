@@ -15,7 +15,7 @@ import java.util.List;
 public class ReservationCustomRepositoryImpl implements ReservationCustomRepository{
 
     private final JPAQueryFactory queryFactory;
-    QReservation reservation = QReservation.reservation;
+    static final QReservation reservation = QReservation.reservation;
 
     @Override
     public List<Reservation> getReservationListByContentsId(Long contentsId) {
@@ -43,11 +43,8 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     ) {
         return queryFactory
                 .selectFrom(reservation)
-                .where(reservation.reservationStartAt.goe(startOfDay)
-                        .and(reservation.reservationEndAt.lt(startOfNextDay))
-                        .and(reservation.contentsId.eq(contentsId)))
+                .where(reservation.reservationStartAt.between(startOfDay, startOfNextDay.minusNanos(1)))
                 .fetch();
-
     }
 
     @Override
@@ -55,7 +52,7 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
         Reservation result = queryFactory
                 .select(reservation)
                 .where(reservation.reservationId.eq(id))
-                .fetchOne();
+                .fetchFirst();
 
         if(result == null) {
             throw new ReservationNotFoundException("존재하지 않는 예약입니다.");

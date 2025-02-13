@@ -9,7 +9,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.6'
-    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+//    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
 group = 'SCDY'
@@ -68,8 +68,9 @@ dependencies {
     implementation "com.querydsl:querydsl-collections"
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     // querydsl JPAAnnotationProcessor 사용 지정
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api" // java.lang.NoClassDefFoundError (javax.annotation.Generated) 대응 코드
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api" // java.lang.NoClassDefFoundError (javax.annotation.Entity) 대응 코드
+    // java.lang.NoClassDefFoundError (javax.annotation.Generated) 대응 코드
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
 
 tasks.named('test') {
@@ -78,18 +79,18 @@ tasks.named('test') {
 
 def querydslDir = 'build/generated/querydslDir'
 
-querydsl {
-    jpa = true
-    querydslSourcesDir = querydslDir
-}
+//querydsl {
+//    jpa = true
+//    querydslSourcesDir = querydslDir
+//}
 
 sourceSets {
     main.java.srcDir querydslDir
 }
 
-compileQuerydsl {
-    options.annotationProcessorPath = configurations.querydsl
-}
+//compileQuerydsl {
+//    options.annotationProcessorPath = configurations.querydsl
+//}
 
 configurations {
     compileOnly {
