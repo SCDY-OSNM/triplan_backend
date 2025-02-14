@@ -43,6 +43,7 @@ public class UserService {
                 .password(password)
                 .nickname(userRequestDto.getNickname())
                 .userRole(role)
+                .phoneNumber(userRequestDto.getPhoneNumber())
                 .build();
         user = userRepository.save(user);
         return UserResponseDto.from(user);
@@ -57,8 +58,8 @@ public class UserService {
             throw new PasswordNotMatchException("잘못된 비밀번호 입니다.");
         }
 
-        String accessToken = jwtUtils.createToken(user.getId(),user.getUserRole());
-        String refreshToken = jwtUtils.createRefreshToken(user.getId(),user.getUserRole());
+        String accessToken = jwtUtils.createToken(user.getUserId(),user.getUserRole());
+        String refreshToken = jwtUtils.createRefreshToken(user.getUserId(),user.getUserRole());
         // Redis에 RefreshToken 저장
         redisTemplate.opsForValue().set(
                 "RT:" + user.getEmail(),

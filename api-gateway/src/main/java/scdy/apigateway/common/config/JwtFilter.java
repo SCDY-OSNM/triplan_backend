@@ -73,6 +73,7 @@ public class JwtFilter implements WebFilter {
                     exchange.mutate()
                             .request(request.mutate()
                                     .header("X-Authenticated-User", String.valueOf(userId))
+                                    .header("X-User-Role", String.valueOf(userRole))
                                     .build())
                             .build()
             ).contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));

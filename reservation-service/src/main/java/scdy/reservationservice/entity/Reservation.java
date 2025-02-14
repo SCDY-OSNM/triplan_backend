@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import scdy.reservationservice.enums.ReservationStatus;
+import scdy.reservationservice.entity.enums.ReservationStatus;
 
 import java.time.LocalDateTime;
 
@@ -38,7 +38,8 @@ public class Reservation {
 
 
     @Builder
-    public Reservation(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt, ReservationStatus reservationStatus) {
+    public Reservation(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt,
+                       LocalDateTime reservationEndAt, ReservationStatus reservationStatus) {
         this.userId = userId;
         this.contentsId = contentsId;
         this.planDetailId = planDetailId;
@@ -48,12 +49,27 @@ public class Reservation {
     }
 
 
-    public void updateReservation(
-            LocalDateTime reservationStartAt,
-            LocalDateTime reservationEndAt,
-            ReservationStatus reservationStatus) {
+    public void updateReservation(Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt,
+                                  ReservationStatus reservationStatus) {
+        this.planDetailId = planDetailId;
         this.reservationStartAt = reservationStartAt;
         this.reservationEndAt = reservationEndAt;
         this.reservationStatus = reservationStatus;
     }
+
+    public void updateReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
+
+    public void makeReservation(Long userId){
+        this.userId = userId;
+        this.reservationStatus = ReservationStatus.WAITING;
+    }
+
+    public void cancelReservation(){
+        this.userId = null;
+        this.reservationStatus = ReservationStatus.NOT_RESERVED;
+    }
+
+
 }
