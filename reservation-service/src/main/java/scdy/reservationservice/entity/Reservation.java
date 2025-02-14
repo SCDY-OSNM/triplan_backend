@@ -38,7 +38,8 @@ public class Reservation {
 
 
     @Builder
-    public Reservation(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt, ReservationStatus reservationStatus) {
+    public Reservation(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt,
+                       LocalDateTime reservationEndAt, ReservationStatus reservationStatus) {
         this.userId = userId;
         this.contentsId = contentsId;
         this.planDetailId = planDetailId;
@@ -48,11 +49,8 @@ public class Reservation {
     }
 
 
-    public void updateReservation(
-            Long planDetailId,
-            LocalDateTime reservationStartAt,
-            LocalDateTime reservationEndAt,
-            ReservationStatus reservationStatus) {
+    public void updateReservation(Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt,
+                                  ReservationStatus reservationStatus) {
         this.planDetailId = planDetailId;
         this.reservationStartAt = reservationStartAt;
         this.reservationEndAt = reservationEndAt;

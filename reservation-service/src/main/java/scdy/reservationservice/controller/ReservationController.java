@@ -17,11 +17,10 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     //단일 예약 생성
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<ApiResponse<ReservationResponseDto>> createReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                  @RequestHeader("X-User-Role") String role,
                                                                                  @RequestBody ReservationRequestDto dto){
-
 
         ReservationResponseDto responseDto = reservationService.createReservation(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("예약 생성 성공", responseDto));
@@ -33,15 +32,17 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> updateReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                  @RequestHeader("X-User-Role") String role,
                                                                                  @RequestBody ReservationRequestDto dto){
+
         ReservationResponseDto responseDto = reservationService.updateReservation(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("예약 수정 성공", responseDto));
     }
 
     //예약 조회
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<ApiResponse<ReservationResponseDto>> getReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                               @RequestHeader("X-User-Role") String role,
                                                                               @RequestBody ReservationRequestDto dto) {
+
         ReservationResponseDto responseDto = reservationService.getReservationById(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("예약 조회 성공", responseDto));
     }
@@ -52,6 +53,7 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getReservationListByContentsId(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                                     @RequestHeader("X-User-Role") String role,
                                                                                                     @RequestBody ReservationRequestDto dto) {
+
         List<ReservationResponseDto> responseDtoList = reservationService.getReservationListByContentsId(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("콘텐츠별 예약목록 조회 성공", responseDtoList));
     }
@@ -61,6 +63,7 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getReservationListByUserId(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                                 @RequestHeader("X-User-Role") String role,
                                                                                                 @RequestBody ReservationRequestDto dto) {
+
         List<ReservationResponseDto> responseDtoList = reservationService.getReservationListByUserId(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("사용자별 예약 목록 조회 성공", responseDtoList));
     }
@@ -68,15 +71,17 @@ public class ReservationController {
     //일간 콘텐츠별 예약 목록
     @GetMapping("/by-daily-contents")
     public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getDailyReservationByContentsId(@RequestBody ReservationRequestDto dto) {
+
         List<ReservationResponseDto> responseDtoList = reservationService.getDailyReservationListByContentsId(dto);
         return ResponseEntity.ok(ApiResponse.success("일간 콘텐츠별 예약 목록 조회 성공", responseDtoList));
     }
 
     //예약 삭제
-    @DeleteMapping
+    @DeleteMapping()
     public ResponseEntity<ApiResponse<Void>> deleteReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                @RequestHeader("X-User-Role") String role,
                                                                @RequestBody ReservationRequestDto dto){
+
         reservationService.deleteReservation(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("에약 삭제 성공"));
     }
@@ -85,6 +90,7 @@ public class ReservationController {
     @GetMapping("/make")
     public ResponseEntity<ApiResponse<ReservationResponseDto>> makeAReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                 @RequestBody ReservationRequestDto dto){
+
         ReservationResponseDto responseDto =  reservationService.makeReservation(dto, userId);
         return ResponseEntity.ok(ApiResponse.success("예약 성공", responseDto));
     }
@@ -94,10 +100,8 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> cancelReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                  @RequestHeader("X-User-Role") String role,
                                                                                  @RequestBody ReservationRequestDto dto){
+
         ReservationResponseDto responseDto = reservationService.cancelReservation(dto, userId, role);
         return ResponseEntity.ok(ApiResponse.success("예약 취소 성공", responseDto));
     }
-
-
-
 }

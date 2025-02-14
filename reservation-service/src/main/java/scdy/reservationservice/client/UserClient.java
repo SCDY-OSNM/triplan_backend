@@ -11,4 +11,5 @@ public interface UserClient {
 
     @GetMapping("/api/v1/users/{userId}")
     ApiResponse<UserResponseDto> getUserById(@PathVariable("userId") Long userId);
+
 }

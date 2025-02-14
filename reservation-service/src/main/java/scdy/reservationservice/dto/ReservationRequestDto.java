@@ -27,10 +27,7 @@ public class ReservationRequestDto {
     private ReservationStatus reservationStatus;
 
     @Builder
-    public ReservationRequestDto(Long contentsId,
-                                 Long planDetailId,
-                                 LocalDateTime reservationStartAt,
-                                 LocalDateTime reservationEndAt,
+    public ReservationRequestDto(Long contentsId, Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt,
                                  ReservationStatus reservationStatus) {
         this.contentsId = contentsId;
         this.planDetailId = planDetailId;

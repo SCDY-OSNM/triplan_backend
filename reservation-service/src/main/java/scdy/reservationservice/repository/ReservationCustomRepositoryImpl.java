@@ -15,7 +15,7 @@ import java.util.List;
 public class ReservationCustomRepositoryImpl implements ReservationCustomRepository{
 
     private final JPAQueryFactory queryFactory;
-    static final QReservation reservation = QReservation.reservation;
+    private final QReservation reservation = QReservation.reservation;
 
     @Override
     public List<Reservation> getReservationListByContentsId(Long contentsId) {
@@ -60,3 +60,5 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
         return result;
     }
 }
+
+// 기준이 있슴 = >  Join 할때만 쿼리가 개복잡할때

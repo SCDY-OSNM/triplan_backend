@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scdy.reservationservice.client.ContentsClient;
 import scdy.reservationservice.client.UserClient;
-import scdy.reservationservice.common.exceptions.BadRequestException;
 import scdy.reservationservice.dto.ContentsResponseDto;
 import scdy.reservationservice.dto.ReservationRequestDto;
 import scdy.reservationservice.dto.ReservationResponseDto;
 import scdy.reservationservice.dto.UserResponseDto;
 import scdy.reservationservice.entity.Reservation;
 import scdy.reservationservice.entity.enums.ReservationStatus;
+import scdy.reservationservice.exception.NotfoundPermissionException;
+import scdy.reservationservice.exception.ReservationBadRequestException;
 import scdy.reservationservice.repository.ReservationRepository;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class ReservationService {
         //check user
         //생성 시 예약자 체크 불필요
         if (!checkUserPermission(userRole, contents.getUserId(), null, userId )) {
-            throw new BadRequestException("권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다.");
         }
 
         Reservation reservation = Reservation.builder()
@@ -63,7 +64,7 @@ public class ReservationService {
         //check user
         //수정 시 예약 사용자 확인 불필요
         if (!checkUserPermission(userRole, contents.getUserId(), null, userId)) {
-            throw new BadRequestException("권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다.");
         }
 
         reservation.updateReservation(
@@ -83,7 +84,7 @@ public class ReservationService {
 
         //check user
         if (!checkUserPermission(userRole, contents.getUserId(), reservation.getUserId(), userId )) {
-            throw new BadRequestException("권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다.");
         }
 
         return ReservationResponseDto.from(reservation);
@@ -98,7 +99,7 @@ public class ReservationService {
         //check user
         // 목록 조회 시에는 예약 사용자 확인 불필요
         if (!checkUserPermission(userRole, contents.getUserId(), null, userId)) {
-            throw new BadRequestException("권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다.");
         }
 
         List<Reservation> reservationList = reservationRepository.getReservationListByContentsId(reservation.getContentsId());
@@ -109,6 +110,7 @@ public class ReservationService {
     }
 
 
+
     //Get Reservation by User
     //Only Admin and user themselves can get reservation list
     public List<ReservationResponseDto> getReservationListByUserId(ReservationRequestDto reservationRequestDto, Long userId, String userRole) {
@@ -116,7 +118,7 @@ public class ReservationService {
 
         //check user
         if (!checkUserPermission(userRole, null, reservation.getUserId() ,userId)) { // contents 필요없음
-            throw new BadRequestException("권한이 없는 사용자입니다");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다");
         }
 
         List<Reservation> reservationList = reservationRepository.getReservationListByUserId(reservationRequestDto.getUserId());
@@ -152,17 +154,17 @@ public class ReservationService {
 
         //check user
         if (!checkUserPermission(userRole, contents.getUserId(), null, userId)) {
-            throw new BadRequestException("권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("권한이 없는 사용자입니다.");
         }
 
         //Check Reservation Status
         if( !reservation.getReservationStatus().equals(ReservationStatus.NOT_RESERVED)) {
-            throw new BadRequestException("예약된 상태에서는 삭제할 수 없습니다.");
+            throw new ReservationBadRequestException("예약된 상태에서는 삭제할 수 없습니다.");
         }
 
         //Check reservation time
         if(reservation.getReservationStartAt().isBefore(LocalDateTime.now())){
-            throw new BadRequestException("지난 예약은 삭제할 수 없습니다. 신청되지 않은 예약은 추후 일괄 삭제됩니다.");
+            throw new ReservationBadRequestException("지난 예약은 삭제할 수 없습니다. 신청되지 않은 예약은 추후 일괄 삭제됩니다.");
         }
 
         //delete reservation
@@ -176,13 +178,13 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByIdOrElseThrow(reservationRequestDto.getReservationId());
 
         //Check the availability of reservation
-        if( !reservation.getReservationStatus().equals(ReservationStatus.NOT_RESERVED)) {
-            throw new BadRequestException("이미 선점된 예약입니다");
+        if(!reservation.getReservationStatus().equals(ReservationStatus.NOT_RESERVED)) {
+            throw new ReservationBadRequestException("이미 선점된 예약입니다");
         }
 
         //Check the time of reservation
         if(reservation.getReservationStartAt().isBefore(LocalDateTime.now())){
-            throw new BadRequestException("지난 시간은 예약할 수 없습니다.");
+            throw new ReservationBadRequestException("지난 시간은 예약할 수 없습니다.");
         }
 
         //make reservation
@@ -201,16 +203,16 @@ public class ReservationService {
 
         //check the reservation
         if(reservation.getReservationStatus().equals(ReservationStatus.NOT_RESERVED)) {
-            throw new BadRequestException("신청되지 않은 예약은 취소할 수 없습니다.");
+            throw new ReservationBadRequestException("신청되지 않은 예약은 취소할 수 없습니다.");
         }
 
         //check user
         if (!checkUserPermission(userRole, contents.getUserId(), reservation.getUserId(), userId)) {
-            throw new BadRequestException("취소 권한이 없는 사용자입니다.");
+            throw new NotfoundPermissionException("취소 권한이 없는 사용자입니다.");
         }
 
         if(reservation.getReservationStartAt().isBefore(LocalDateTime.now())){
-            throw new BadRequestException("지난 예약은 취소할 수 없습니다.");
+            throw new ReservationBadRequestException("지난 예약은 취소할 수 없습니다.");
         }
 
         reservation.cancelReservation();
@@ -231,6 +233,8 @@ public class ReservationService {
         return isAdmin || (isHost && isOwner) || isReservedUser;
     }
 
+
+    //Feign Client 호출
     private UserResponseDto getUser(Long userId) {
         return userClient.getUserById(userId).getData();
     }

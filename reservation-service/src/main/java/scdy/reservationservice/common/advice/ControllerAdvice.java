@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import scdy.reservationservice.common.exceptions.*;
-import scdy.reservationservice.common.advice.ErrorResponse;
+
 
 @RestControllerAdvice
 public class ControllerAdvice {
@@ -16,7 +16,7 @@ public class ControllerAdvice {
 
     @ExceptionHandler(BadRequestException.class) // 400 Bad Request
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
     }
     @ExceptionHandler(ForbiddenException.class) // 403 Forbidden
     public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e) {
