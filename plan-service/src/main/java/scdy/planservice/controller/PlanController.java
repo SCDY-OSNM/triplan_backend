@@ -1,8 +1,6 @@
 package scdy.planservice.controller;
 
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.shaded.com.google.protobuf.Api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import scdy.planservice.common.advice.ApiResponse;

@@ -3,7 +3,6 @@ package scdy.planservice.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import scdy.planservice.entity.Member;
 import scdy.planservice.entity.Plan;
 import scdy.planservice.enums.MemberRole;

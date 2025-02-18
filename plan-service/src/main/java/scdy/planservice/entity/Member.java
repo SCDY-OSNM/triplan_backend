@@ -1,7 +1,6 @@
 package scdy.planservice.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Index;
 import lombok.Getter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
