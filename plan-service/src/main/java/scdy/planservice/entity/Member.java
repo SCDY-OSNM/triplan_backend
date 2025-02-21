@@ -1,7 +1,6 @@
 package scdy.planservice.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Index;
 import lombok.Getter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,9 @@ public class Member {
     private Long memberId;
 
     @Column(nullable = false)
-    private Long planId;
+    @ManyToOne
+    @JoinColumn(name = "planId", referencedColumnName = "planId")
+    private Plan plan;
 
     @Column(nullable = false)
     private Long userId;
@@ -26,11 +27,14 @@ public class Member {
     @Column(nullable = false)
     private MemberRole memberRole;
 
-
     @Builder
-    public Member(Long planId, Long userId, MemberRole memberRole){
-        this.planId = planId;
+    public Member(Plan plan, Long userId, MemberRole memberRole){
+        this.plan = plan;
         this.userId = userId;
+        this.memberRole = memberRole;
+    }
+
+    public void updateMember(MemberRole memberRole){
         this.memberRole = memberRole;
     }
 

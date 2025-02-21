@@ -54,6 +54,6 @@ public class Plan {
     }
 
     public void changePublic(Boolean isPublic){
-        this.isPublic =isPublic;
+        this.isPublic = isPublic;
     }
 }

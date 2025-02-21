@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import scdy.planservice.enums.PlanCategory;
+import scdy.planservice.enums.PlanDetailCategory;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,10 +17,15 @@ public class PlanDetail {
     private Long planDetailId;
 
     @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "planId", referencedColumnName = "planId")
+    private Plan plan;
+
+    @Column(nullable = false)
     private Long contentId;
 
     @Column(nullable = false)
-    private PlanCategory category;
+    private PlanDetailCategory planDetailCategory;
 
     @Column(nullable = false)
     private String planDetailName;
@@ -29,7 +34,7 @@ public class PlanDetail {
     private String planDetailMemo;
 
     @Column(nullable = false)
-    private String planDetailCost;
+    private Long planDetailCost;
 
     @Column(nullable = false)
     private LocalDateTime planDetailTime;
@@ -41,11 +46,12 @@ public class PlanDetail {
     private Integer planDetailDay;
 
     @Builder
-    public PlanDetail(Long contentId, PlanCategory category,
-                      String planDetailName, String planDetailMemo, String planDetailCost,
+    public PlanDetail(Long contentId, Plan plan, PlanDetailCategory planDetailCategory,
+                      String planDetailName, String planDetailMemo, Long planDetailCost,
                       LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay){
         this.contentId = contentId;
-        this.category = category;
+        this.plan = plan;
+        this.planDetailCategory = planDetailCategory;
         this.planDetailName = planDetailName;
         this.planDetailMemo = planDetailMemo;
         this.planDetailCost = planDetailCost;
@@ -54,16 +60,17 @@ public class PlanDetail {
         this.planDetailDay = planDetailDay;
     }
 
-    public void updatePlanDetail(String planDetailName, String planDetailMemo){
+    // 이름, 메모, 시간 수정
+    public void updatePlanDetail(String planDetailName, String planDetailMemo, LocalDateTime planDetailTime){
         this.planDetailName = planDetailName;
-        this.planDetailMemo =planDetailMemo;
+        this.planDetailMemo = planDetailMemo;
+        this.planDetailTime = planDetailTime;
     }
 
-    public void updatePlanDetailTimeLine(LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay){
-        this.planDetailTime = planDetailTime;
+    // 순서, 날짜 수정
+    public void updatePlanDetailTimeLine(Integer planDetailTimeLine, Integer planDetailDay){
         this.planDetailTimeLine = planDetailTimeLine;
         this.planDetailDay = planDetailDay;
     }
-
 
 }
