@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scdy.planservice.client.UserClient;
-import scdy.planservice.common.exceptions.BadRequestException;
-import scdy.planservice.common.exceptions.NotFoundException;
 import scdy.planservice.dto.*;
 import scdy.planservice.entity.Member;
 import scdy.planservice.entity.Plan;
 import scdy.planservice.entity.PlanPlace;
 import scdy.planservice.enums.MemberRole;
 import scdy.planservice.enums.Place;
+import scdy.planservice.exception.MemberNotFoundException;
+import scdy.planservice.exception.NotAllowedAuthException;
 import scdy.planservice.repository.MemberRepository;
 import scdy.planservice.repository.PlanPlaceRepository;
 import scdy.planservice.repository.PlanRepository;
@@ -66,7 +66,7 @@ public class PlanService {
     public PlanResponseDto readPlan(Long planId, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
         if(!checkAuth(userId, planId)) {
-            throw new BadRequestException("비공개 플랜입니다.");
+            throw new NotAllowedAuthException("멤버만 조회 가능한 플랜입니다.");
         }
         return PlanResponseDto.from(plan);
     }
@@ -76,7 +76,7 @@ public class PlanService {
     public PlanResponseDto updatePlan(Long planId, PlanRequestDto planRequestDto, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
         if(memberRepository.findByUserIdPlanId(planId, userId).isEmpty()) {
-            throw new BadRequestException("수정 권한이 없습니다.");
+            throw new NotAllowedAuthException("멤버만 수정이 가능합니다.");
         }
         plan.updatePlan(planRequestDto.getPlanTitle(), planRequestDto.getPlanStartAt(), planRequestDto.getPlanEndAt(), planRequestDto.getPlanPlace());
 
@@ -88,10 +88,10 @@ public class PlanService {
     public PlanResponseDto deletePlan(Long planId, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
         Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
-                () -> new NotFoundException("Member Not Exist"));
+                () -> new MemberNotFoundException("멤버가 존재하지 않습니다."));
 
         if(!checkLeader(userId, planId)) {
-            throw new BadRequestException("리더만 삭제가 가능합니다.");
+            throw new NotAllowedAuthException("리더만 삭제가 가능합니다.");
         }
         planRepository.deleteById(planId);
         return PlanResponseDto.from(plan);
@@ -110,7 +110,7 @@ public class PlanService {
         Plan plan = planRepository.findByIdOrElseThrow(planId);
 
         if(checkLeader(userId, planId)){
-            throw new BadRequestException("리더만 전환이 가능합니다.");
+            throw new NotAllowedAuthException("리더만 전환이 가능합니다.");
         }
         if(plan.getIsPublic()==Boolean.TRUE){
             plan.changePublic(Boolean.FALSE);
@@ -151,7 +151,7 @@ public class PlanService {
 
     private boolean checkLeader(Long userId, Long planId){
         Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
-                ()-> new NotFoundException("Member Not Found"));
+                ()-> new MemberNotFoundException("멤버가 존재하지 않습니다."));
         if(member.getMemberRole()== MemberRole.LEADER) {
             return true;
         }

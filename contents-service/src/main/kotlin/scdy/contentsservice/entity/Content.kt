@@ -1,7 +1,6 @@
 package scdy.contentsservice.entity
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import scdy.contentsservice.enums.ContentType
@@ -13,7 +12,8 @@ import scdy.contentsservice.enums.ContentType
 class Content(
     @Id
     @Column(name= "contentId")
-    var contentId : Long,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var contentId : Long, // 이렇게 하면 0부터 자동증가하는건가요..?? 이해가 안됨
 
     @Column(nullable = false)
     var userId : Long,
@@ -64,9 +64,9 @@ class Content(
     }
     companion object{
         fun of(contentId: Long, userId: Long, contentName : String, contentType: ContentType,
-               contentGrade: Int, contentExplain: String, contentAddress: String, contentAmount: Int, contentLike: Int, contentLatitute: String, contentLongitude: String, contentPrice: Int ): Content{
+               contentGrade: Int, contentExplain: String, contentAddress: String, contentAmount: Int, contentLike: Int, contentLatitude: String, contentLongitude: String, contentPrice: Int ): Content{
             return Content(
-                contentId = contentId,
+                    contentId = contentId,
                 userId = userId,
                 contentName = contentName,
                 contentType = contentType,
@@ -74,7 +74,7 @@ class Content(
                 contentExplain = contentExplain,
                 contentAddress = contentAddress,
                 contentLike = contentLike,
-                contentLatitude = contentLatitute,
+                contentLatitude = contentLatitude,
                 contentLongitude = contentLongitude,
                 contentAmount = contentAmount,
                 contentPrice = contentPrice,
