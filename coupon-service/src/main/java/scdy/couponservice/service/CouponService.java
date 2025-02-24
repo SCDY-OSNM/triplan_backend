@@ -11,6 +11,7 @@ import scdy.couponservice.dto.UserCouponResponseDto;
 import scdy.couponservice.entity.Coupon;
 import scdy.couponservice.entity.UserCoupon;
 import scdy.couponservice.enums.CouponType;
+import scdy.couponservice.enums.DiscountType;
 import scdy.couponservice.exception.CouponAmountErrorException;
 import scdy.couponservice.exception.CouponAmountNullException;
 import scdy.couponservice.exception.PermissionNotfoundException;
@@ -32,10 +33,10 @@ public class CouponService {
     //create coupon
     //Only ADMIN can create coupon
     @Transactional
-    public CouponResponseDto createCoupon(CouponRequestDto couponRequestDto, Long userId, String userRole) {
+    public CouponResponseDto createCoupon(CouponRequestDto couponRequestDto, String userRole) {
 
         //check user
-        if(!checkPermission(userRole, null, null)){
+        if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("권한이 없는 사용자입니다.");
         }
 
@@ -43,7 +44,16 @@ public class CouponService {
         boolean isCouponAmountNull = couponRequestDto.getCouponAmount() == null;
 
         if(isLimit && isCouponAmountNull){
-            throw new CouponAmountNullException("LIMIT 쿠폰은 쿠폰 개수가 필수입니다.");
+            throw new CouponAmountNullException("LIMIT 쿠폰은 쿠폰 발급 개수가 필수입니다.");
+        }
+
+        boolean isAmount = couponRequestDto.getDiscountType().equals(DiscountType.AMOUNT);
+        boolean isPercent = couponRequestDto.getDiscountType().equals(DiscountType.PERCENT);
+        boolean isDCPriceNull = couponRequestDto.getDiscountPrice() == null;
+        boolean isDCPercentageNull = couponRequestDto.getDiscountPercentage() == null;
+
+        if((isAmount && isDCPriceNull) || (isPercent && isDCPercentageNull)){
+            throw new CouponAmountNullException("쿠폰 할인 값은 필수입니다.");
         }
 
         Coupon coupon = Coupon.builder()
@@ -72,10 +82,11 @@ public class CouponService {
     public CouponResponseDto updateCoupon(CouponRequestDto couponRequestDto, Long userId, String userRole) {
         Coupon coupon = getCoupon(couponRequestDto.getCouponId());
 
-        if(!checkPermission(userRole, null, null)){
+        if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("권한이 없는 사용자입니다.");
         }
 
+        //null parameter check
         String couponName = couponRequestDto.getCouponName() == null ? coupon.getCouponName() : couponRequestDto.getCouponName();
         LocalDate expiryDate = couponRequestDto.getExpiryDate() == null ? coupon.getExpiryDate() : couponRequestDto.getExpiryDate();
         Boolean available = couponRequestDto.getAvailable() == null ? coupon.getAvailable() : couponRequestDto.getAvailable();
@@ -98,7 +109,7 @@ public class CouponService {
     public void deleteCoupon(CouponRequestDto couponRequestDto, String userRole){
         Coupon coupon = getCoupon(couponRequestDto.getCouponId());
 
-        if(!checkPermission(userRole, null, null)){
+        if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("권한이 없는 사용자입니다.");
         }
 
@@ -114,10 +125,12 @@ public class CouponService {
     public UserCouponResponseDto issueCoupon(UserCouponRequestDto userCouponRequestDto, String userRole){
         Coupon coupon = getCoupon(userCouponRequestDto.getCouponId());
 
-        if(!checkPermission(userRole, null, null)){
+        //ALL 쿠폰 발급시 관리자 권한 체크
+        if(!(checkIsAdmin(userRole) && coupon.getCouponType().equals(CouponType.ALL))){
             throw new PermissionNotfoundException("쿠폰발급 권한이 없는 사용자입니다.");
         }
 
+        //TODO: 추후 락 구현 필요
         //check amount
         if(coupon.getCouponAmount() <= userCouponRepository.getUserCouponCountByCouponId(coupon.getCouponId())){
             throw new CouponAmountErrorException("쿠폰이 소진되었습니다");
@@ -148,10 +161,11 @@ public class CouponService {
 
 
     //read UserCoupon List by User
-    //Only Admin or Owned user can read UserCuponList
-    public List<UserCouponResponseDto> getUserCouponListByUserId(Long userId, String userRole){
+    //Only Admin or Owned user can read UserCouponList
+    public List<UserCouponResponseDto> getUserCouponListByUserId(Long userId, Long requestUserId, String userRole){
 
-        if(!checkPermission(userRole, null ,null)){
+        //ADMIN이면 전체 조회 가능, 아니면 본인것만 가능
+        if(!checkPermission(userRole, userId ,requestUserId)){
             throw new PermissionNotfoundException("조회 권한이 없는 사용자입니다.");
         }
 
@@ -184,7 +198,7 @@ public class CouponService {
     public void deleteUserCoupon(UserCouponRequestDto userCouponRequestDto, String userRole){
         UserCoupon userCoupon = getUserCoupon(userCouponRequestDto.getUserCouponId());
 
-        if(!checkPermission(userRole, null, null)){
+        if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("유저 쿠폰 삭제 권한이 없는 사용자입니다.");
         }
 
@@ -192,16 +206,20 @@ public class CouponService {
     }
 
 
+    //TODO: Batch Scheduler 를 이용해 사용 연한이 지난 쿠폰 삭제 구현
+
 
     // Permission Check
+    private boolean checkIsAdmin(String userRole){
+        return userRole.equals("ADMIN");
+    }
+
     private boolean checkPermission(String userRole,Long couponOwnerId, Long requestUserId) {
         boolean isAdmin = userRole.equals("ADMIN");
         boolean isOwner = couponOwnerId.equals(requestUserId);
 
         return isAdmin || isOwner;
     }
-
-    //FeignClient 호출
 
 
     //Entity 호출

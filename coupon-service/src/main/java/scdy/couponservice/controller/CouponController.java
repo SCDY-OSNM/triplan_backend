@@ -24,7 +24,7 @@ public class CouponController {
                                                                        @RequestHeader("X-User-Role") String role,
                                                                        @RequestBody CouponRequestDto dto) {
 
-        CouponResponseDto couponResponseDto = couponService.createCoupon(dto, userId, role);
+        CouponResponseDto couponResponseDto = couponService.createCoupon(dto, role);
         return ResponseEntity.ok(ApiResponse.success("쿠폰 생성 성공", couponResponseDto));
     }
 
@@ -69,11 +69,12 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 조회 성공", userCouponResponseDto));
     }
 
-    @GetMapping("/userCoupons/getByUserId")
-    public ResponseEntity<ApiResponse<List<UserCouponResponseDto>>> getUserCouponListByUserId(@RequestHeader("X-Authenticated-User") Long userId,
-                                                                                              @RequestHeader("X-User-Role") String role) {
+    @GetMapping("/userCoupons/getByUserId/{userId}")
+    public ResponseEntity<ApiResponse<List<UserCouponResponseDto>>> getUserCouponListByUserId(@RequestHeader("X-Authenticated-User") Long requestUserId,
+                                                                                              @RequestHeader("X-User-Role") String role,
+                                                                                              @PathVariable("userId") Long userId) {
 
-        List<UserCouponResponseDto> userCouponResponseDtos = couponService.getUserCouponListByUserId(userId, role);
+        List<UserCouponResponseDto> userCouponResponseDtos = couponService.getUserCouponListByUserId(userId, requestUserId, role);
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 목록 조회 성공", userCouponResponseDtos));
     }
 
