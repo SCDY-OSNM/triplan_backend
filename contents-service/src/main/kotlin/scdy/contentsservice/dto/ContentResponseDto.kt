@@ -3,9 +3,8 @@ package scdy.contentsservice.dto
 import scdy.contentsservice.entity.Content
 import scdy.contentsservice.enums.ContentType
 
-
 data class ContentResponseDto(
-        val contentId: Long,
+        val contentId: Long?,
 
         val userId: Long,
 
@@ -32,7 +31,7 @@ data class ContentResponseDto(
     companion object {
         fun from(content: Content): ContentResponseDto {
             return ContentResponseDto(
-                    contentId = content.contentId,
+                    contentId = content.id,
                     userId = content.userId,
                     contentName = content.contentName,
                     contentType = content.contentType,

@@ -5,6 +5,7 @@ import scdy.contentsservice.enums.ContentType
 
 
 class ContentRequestDto(
+
         var userId : Long,
 
         var contentName : String,

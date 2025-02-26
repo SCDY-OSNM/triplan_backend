@@ -1,4 +1,4 @@
 package scdy.contentsservice.common.exceptions
 
-class ForbiddenException(message:String) :RuntimeException(message){
+open class ForbiddenException(message:String) :RuntimeException(message){
 }
