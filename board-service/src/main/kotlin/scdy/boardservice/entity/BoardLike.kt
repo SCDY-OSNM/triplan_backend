@@ -1,16 +1,12 @@
 package scdy.boardservice.entity
 
 import jakarta.persistence.*
-import lombok.Getter
-import lombok.NoArgsConstructor
 
 @Entity
-@Getter
-@NoArgsConstructor
 class BoardLike (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var boardLikeId : Long,
+    var boardLikeId : Long? = null,
 
     @Column(nullable = false)
     var userId : Long,

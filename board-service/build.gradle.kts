@@ -29,8 +29,8 @@ dependencyManagement {
 
 dependencies {
     //Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+//    compileOnly("org.projectlombok:lombok")
+//    annotationProcessor("org.projectlombok:lombok")
 
     // Spring Boot 기본 스타터 패키지
     implementation("org.springframework.boot:spring-boot-starter-web")
