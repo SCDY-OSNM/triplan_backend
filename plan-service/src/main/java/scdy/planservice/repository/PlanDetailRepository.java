@@ -5,9 +5,6 @@ import scdy.planservice.entity.PlanDetail;
 import scdy.planservice.exception.PlanDetailNotFoundException;
 import scdy.planservice.repository.queryDsl.PlanDetailCustomRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface PlanDetailRepository extends JpaRepository<PlanDetail, Long> , PlanDetailCustomRepository {
     // @Query("select pd from PlanDetail pd where pd.planDetailId = :planDetailId")
     //Optional<PlanDetail> findByPlanDetailId(Long planDetailId);
