@@ -16,7 +16,6 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    @Column(nullable = false)
     @ManyToOne
     @JoinColumn(name = "planId", referencedColumnName = "planId")
     private Plan plan;

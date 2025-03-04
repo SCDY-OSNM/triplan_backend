@@ -16,7 +16,6 @@ public class PlanDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long planDetailId;
 
-    @Column(nullable = false)
     @ManyToOne
     @JoinColumn(name = "planId", referencedColumnName = "planId")
     private Plan plan;

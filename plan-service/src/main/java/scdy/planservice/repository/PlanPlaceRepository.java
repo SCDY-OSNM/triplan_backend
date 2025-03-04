@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface PlanPlaceRepository extends JpaRepository<PlanPlace, Long> {
     List<PlanPlace> findPlanPlaceByPlanId(Long planId);
 
-    Optional<PlanPlace> findPlanPlaceById(Long planPlaceId);
+    //Optional<PlanPlace> findPlanPlaceById(Long planPlaceId);
 
     List<PlanPlace> findPlanPlaceByPlace(Place place);
 
