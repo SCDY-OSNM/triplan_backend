@@ -13,8 +13,7 @@ class Content(
     @Id
     @Column(name= "contentId")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id : Long? = null, // 코드 맞는지 한번만 확인해주십쇼.
-                                    // 이렇게 하면 dto에 아이디를 넣지 않아도 자동으로 숫자를 채운다는데
+    val id : Long? = null,
 
     @Column(nullable = false)
     var userId : Long,

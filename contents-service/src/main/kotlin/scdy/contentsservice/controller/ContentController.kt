@@ -32,7 +32,7 @@ class ContentController(private val contentService: ContentService) {
     // 콘텐츠 수정
     @PutMapping("/{contentId}")
     fun updateContent(
-            @RequestHeader("X-Authenticated-User") userId: Long, @RequestHeader("X-Authenticated-Role") userRole: UserRole,
+            @RequestHeader("X-Authenticated-User") userId: Long, @RequestHeader("X-User-Role") userRole: UserRole,
             @PathVariable contentId: Long, @RequestBody contentRequestDto: ContentRequestDto
     ): ResponseEntity<ApiResponse<ContentResponseDto>> {
         val contentResponseDto = contentService.updateContent(userId, userRole, contentId, contentRequestDto)
@@ -43,7 +43,7 @@ class ContentController(private val contentService: ContentService) {
     @DeleteMapping("/{contentId}")
     fun deleteContent(
             @RequestHeader("X-Authenticated-User") userId: Long,
-            @RequestHeader("X-Authenticated-Role") userRole: UserRole,
+            @RequestHeader("X-User-Role") userRole: UserRole,
             @PathVariable contentId: Long
     ): ResponseEntity<ApiResponse<ContentResponseDto>> {
         val contentResponseDto = contentService.deleteContent(userRole, userId, contentId)
