@@ -1,11 +1,13 @@
 package scdy.notificationservice.common.config;
 
-import lombok.Value;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -27,6 +29,7 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.password}")
     private String password;
 
+
     @Value("${rabbitmq.queue.name}")
     private String queueName;
 
@@ -36,19 +39,22 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
-
     @Bean
     public Queue queue(){
         return new Queue(queueName);
     }
-
     @Bean
     public DirectExchange exchange() {
         return new DirectExchange(exchangeName);
     }
 
     @Bean
-    public CachingConnectionFactory connectionFactory(){
+    public Binding binding(Queue queue, DirectExchange exchange){
+        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+    }
+
+    @Bean
+    public ConnectionFactory connectionFactory(){
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost(rabbitMQHost);
         connectionFactory.setPort(rabbitMQPort);
@@ -58,14 +64,15 @@ public class RabbitMQConfig {
     } // RabbitMQ 연결을 위한 ConnectionFactory 빈 생성, 반환
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory){
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter){
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter());
+        rabbitTemplate.setMessageConverter(messageConverter);
         return rabbitTemplate;
-    } // Json 형식의 메세지 직렬화
+    }
 
     @Bean
     public MessageConverter jackson2JsonMessageConverter(){
         return new Jackson2JsonMessageConverter();
-    }
+    } // Json 형식의 메세지 직렬, 역직렬화
+
 }

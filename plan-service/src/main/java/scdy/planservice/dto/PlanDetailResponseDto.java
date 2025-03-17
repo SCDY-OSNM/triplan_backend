@@ -31,7 +31,6 @@ public class PlanDetailResponseDto {
     private Integer planDetailDay;
 
     @Builder
-
     public PlanDetailResponseDto(Long contentId, Plan plan, PlanDetailCategory planCategory, String planDetailName, String planDetailMemo, Long planDetailCost, LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay) {
         this.contentId = contentId;
         this.plan = plan;
