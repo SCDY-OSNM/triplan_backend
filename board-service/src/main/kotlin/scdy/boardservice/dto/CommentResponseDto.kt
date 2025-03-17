@@ -5,7 +5,7 @@ import scdy.boardservice.entity.Comment
 import java.time.LocalDateTime
 
 data class CommentResponseDto(
-    val commentId : Long,
+    val commentId : Long?,
     val userId : Long,
     val contents: String,
     val createdAt: LocalDateTime,
