@@ -148,12 +148,10 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
         }
 
         //사용자 확인(좋아요를 누르지 않은경우)
-        val boardLike: BoardLike? = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
+        val boardLike: BoardLike = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
             ?: throw UnLikedBoardException("좋아요 하지 않은 게시물입니다.")
 
-        if (boardLike != null) {
-            boardLikeRepository.delete(boardLike)
-        }
+        boardLikeRepository.delete(boardLike)
 
         return true
     }
