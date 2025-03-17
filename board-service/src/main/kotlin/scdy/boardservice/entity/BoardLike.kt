@@ -3,6 +3,7 @@ package scdy.boardservice.entity
 import jakarta.persistence.*
 
 @Entity
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["userId", "boardId"])])
 class BoardLike (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

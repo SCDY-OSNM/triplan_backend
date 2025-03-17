@@ -81,8 +81,8 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
         val board = boardRepository.findById(boardId).orElseThrow{
             throw BoardNotFoundException("존재하지 않는 게시글입니다")
         }
-
-        if( !isAdmin(userRole) || !isOwner(board.userId, userId)){
+        println(userRole +  " " + board.userId + userId )
+        if( !isAdmin(userRole) && !isOwner(board.userId, userId)){
             throw NotFoundPermissionException("수정 권한이 없는 사용자입니다.")
         }
 
@@ -105,7 +105,7 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
             throw BoardNotFoundException("존재하지 않는 게시물입니다.")
         }
 
-        if( !isAdmin(userRole) || !isOwner(board.userId, userId)){
+        if( !isAdmin(userRole) && !isOwner(board.userId, userId)){
             throw NotFoundPermissionException("삭제 권한이 없는 사용자입니다")
         }
 
@@ -121,12 +121,12 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
 
         //게시물 확인
         val board = boardRepository.findById(boardId).orElseThrow {
-            BoardNotFoundException("존재하지 않는 게시물입니다.")
+            throw BoardNotFoundException("존재하지 않는 게시물입니다.")
         }
 
         //사용자 확인(이미 좋아요가 있는지)
-        if( boardLikeRepository.findByUserId(userId) != null){
-            AleadyLikedBoardException("이미 좋아요 한 게시물입니다.")
+        if( boardLikeRepository.findByUserIdAndId(userId, boardId).isPresent){
+            throw AleadyLikedBoardException("이미 좋아요 한 게시물입니다.")
         }
 
         val boardLike = BoardLike(
@@ -143,16 +143,16 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
     @Transactional
     fun cancelLikeBoard(boardId: Long, userId: Long): Boolean {
 
-        val board = boardRepository.findById(boardId).orElseThrow {
+        boardRepository.findById(boardId).orElseThrow {
             throw BoardNotFoundException("존재하지 않는 게시물입니다.")
         }
 
         //사용자 확인(좋아요를 누르지 않은경우)
-        var boardLike: BoardLike? = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
+        val boardLike: BoardLike? = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
             ?: throw UnLikedBoardException("좋아요 하지 않은 게시물입니다.")
 
         if (boardLike != null) {
-            boardLikeRepository.deleteById(boardLike.userId)
+            boardLikeRepository.delete(boardLike)
         }
 
         return true
@@ -172,6 +172,7 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
 
     //permission check
     fun isAdmin(userRole: String): Boolean {
+        println(userRole)
         return userRole == "ADMIN"
     }
 

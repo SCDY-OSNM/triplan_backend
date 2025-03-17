@@ -61,7 +61,7 @@ class CommentService(private val commentRepository: CommentRepository, private v
 
         val comment = commentRepository.findByIdOrElseThrow(commentId)
 
-        if( !isAdmin(userRole) || !isOwner(commentId, userId)){
+        if( !isAdmin(userRole) && !isOwner(commentId, userId)){
             throw NotFoundPermissionException("수정 권한이 없는 사용자입니다.")
         }
 
@@ -76,7 +76,7 @@ class CommentService(private val commentRepository: CommentRepository, private v
 
         val comment = commentRepository.findByIdOrElseThrow(commentId)
 
-        if( !isAdmin(userRole) || !isOwner(commentId, userId)){
+        if( !isAdmin(userRole) && !isOwner(commentId, userId)){
             throw NotFoundPermissionException("삭제 권한이 없는 사용자입니다")
         }
 
