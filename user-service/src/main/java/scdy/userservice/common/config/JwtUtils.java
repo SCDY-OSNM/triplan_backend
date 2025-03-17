@@ -33,7 +33,7 @@ public class JwtUtils {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long id, UserRole userRole) {
+    public String createToken(Long id, String userRole) {
         Date date = new Date();
 
         return Jwts.builder()
@@ -46,7 +46,7 @@ public class JwtUtils {
                 .compact();
     }
     
-    public String createRefreshToken(Long id, UserRole userRole){
+    public String createRefreshToken(Long id, String userRole){
         Date date = new Date();
         return Jwts.builder()
                 .setSubject(String.valueOf(id))

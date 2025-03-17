@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
-class BoardService (private var boardRepository: BoardRepository, private var boardLikeRepository: BoardLikeRepository) {
+class BoardService (private val boardRepository: BoardRepository, private val boardLikeRepository: BoardLikeRepository) {
 
     // create Board
     // 공지는 ADMIN 만 작성 가능
@@ -42,16 +42,16 @@ class BoardService (private var boardRepository: BoardRepository, private var bo
             boardCategory = boardRequestDto.boardCategory
         )
 
-        boardRepository.save(board);
+        val saved = boardRepository.save(board);
 
-        return BoardResponseDto.from(board)
+        return BoardResponseDto.from(saved)
     }
 
     //get board By boardId
     fun readBoard(boardId: Long): BoardResponseDto {
 
         val board = boardRepository.findById(boardId).orElseThrow {
-            BoardNotFoundException("존재하지 않는 게시글입니다")
+            BoardNotFoundException("존재하지 않는 게시글입니다.")
         }
 
         return BoardResponseDto.from(board)
@@ -60,7 +60,7 @@ class BoardService (private var boardRepository: BoardRepository, private var bo
     //get Board By Category
     fun getBoardByCategory(boardCategory: BoardCategory, pageable: Pageable): Page<BoardResponseDto> {
 
-        val boardPage: Page<Board> = boardRepository.findBoardByCategory(boardCategory, pageable)
+        val boardPage: Page<Board> = boardRepository.findBoardByBoardCategory(boardCategory, pageable)
 
         return boardPage.map{ BoardResponseDto.from(it) }
     }
@@ -148,7 +148,7 @@ class BoardService (private var boardRepository: BoardRepository, private var bo
         }
 
         //사용자 확인(좋아요를 누르지 않은경우)
-        var boardLike: BoardLike? = boardLikeRepository.findByUserIdAndBoardId(userId, boardId).orElse(null)
+        var boardLike: BoardLike? = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
             ?: throw UnLikedBoardException("좋아요 하지 않은 게시물입니다.")
 
         if (boardLike != null) {

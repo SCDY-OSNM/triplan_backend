@@ -3,12 +3,11 @@ package scdy.apigateway.common.config;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -19,6 +18,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class JwtFilter implements WebFilter {
 
         // 인증 예외 경로 설정
         if (path.equals("/api/v1/users") || path.equals("/api/v1/users/login")) {
-            return chain.filter(exchange);  // 경로에 대한 필터링 없이 통과
+            return chain.filter(exchange);
         }
 
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -47,36 +47,45 @@ public class JwtFilter implements WebFilter {
 
         try {
             String token = jwtUtil.substringToken(authHeader);
-            if (redisTemplate.hasKey("BL:" + token)) {
+
+            // Redis 블랙리스트 체크
+            Boolean isBlacklisted = redisTemplate.hasKey("BL:" + token);
+            if (Boolean.TRUE.equals(isBlacklisted)) {
                 return onError(exchange, "Expired JWT", HttpStatus.BAD_REQUEST);
             }
-            Claims claims = jwtUtil.extractClaims(token);
 
+            Claims claims = jwtUtil.extractClaims(token);
             if (claims == null) {
                 return onError(exchange, "Invalid JWT token", HttpStatus.UNAUTHORIZED);
             }
 
             Long userId = claims.get("userId", Long.class);
             String userRole = claims.get("userRole", String.class);
-            log.info("user ID: {}, Role: {}", userId, userRole);
+            log.info("User ID: {}, Role: {}", userId, userRole);
 
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    CustomUserDetails.builder()
-                            .userId(userId)
-                            .role(userRole)
-                            .build(),
-                    null,
-                    Collections.singletonList(new SimpleGrantedAuthority(userRole))
-            );
+            List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(userRole));
 
-            return chain.filter(
-                    exchange.mutate()
-                            .request(request.mutate()
-                                    .header("X-Authenticated-User", String.valueOf(userId))
-                                    .header("X-User-Role", String.valueOf(userRole))
-                                    .build())
-                            .build()
-            ).contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+            CustomUserDetails userDetails = CustomUserDetails.builder()
+                    .userId(userId)
+                    .userRole(userRole)
+                    .build();
+
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
+            // 새로운 HTTP 요청을 생성하여 헤더 추가
+            ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(request) {
+                @Override
+                public HttpHeaders getHeaders() {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.addAll(super.getHeaders());
+                    headers.add("X-Authenticated-User", String.valueOf(userId));
+                    headers.add("X-User-Role", userRole);
+                    return headers;
+                }
+            };
+
+            return chain.filter(exchange.mutate().request(mutatedRequest).build())
+                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
 
         } catch (Exception e) {
             log.error("JWT validation failed", e);
@@ -85,9 +94,8 @@ public class JwtFilter implements WebFilter {
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(httpStatus);
+        exchange.getResponse().setStatusCode(httpStatus);
         log.error("Error in JwtFilter: {}", err);
-        return response.setComplete();
+        return exchange.getResponse().setComplete();
     }
 }
