@@ -1,7 +1,6 @@
 package scdy.contentsservice.entity
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import scdy.contentsservice.enums.ContentType
@@ -13,7 +12,8 @@ import scdy.contentsservice.enums.ContentType
 class Content(
     @Id
     @Column(name= "contentId")
-    var contentId : Long,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id : Long? = null,
 
     @Column(nullable = false)
     var userId : Long,
@@ -54,8 +54,12 @@ class Content(
         this.contentAmount = contentAmount
     }
 
-    fun updateContentLike(contentLike : Int){
-        this.contentLike = contentLike
+    fun contentLikeUp(){
+        this.contentLike += 1
+    }
+
+    fun contentLikeDown(){
+        this.contentLike -= 1
     }
 
     fun updateLocation(contentLatitute : String, contentLongitute : String){
@@ -63,10 +67,9 @@ class Content(
         this.contentLongitude = contentLongitute
     }
     companion object{
-        fun of(contentId: Long, userId: Long, contentName : String, contentType: ContentType,
-               contentGrade: Int, contentExplain: String, contentAddress: String, contentAmount: Int, contentLike: Int, contentLatitute: String, contentLongitude: String, contentPrice: Int ): Content{
+        fun of( userId: Long, contentName : String, contentType: ContentType,
+               contentGrade: Int, contentExplain: String, contentAddress: String, contentAmount: Int, contentLike: Int, contentLatitude: String, contentLongitude: String, contentPrice: Int ): Content{
             return Content(
-                contentId = contentId,
                 userId = userId,
                 contentName = contentName,
                 contentType = contentType,
@@ -74,7 +77,7 @@ class Content(
                 contentExplain = contentExplain,
                 contentAddress = contentAddress,
                 contentLike = contentLike,
-                contentLatitude = contentLatitute,
+                contentLatitude = contentLatitude,
                 contentLongitude = contentLongitude,
                 contentAmount = contentAmount,
                 contentPrice = contentPrice,

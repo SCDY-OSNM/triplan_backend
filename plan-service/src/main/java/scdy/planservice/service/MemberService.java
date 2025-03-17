@@ -3,13 +3,13 @@ package scdy.planservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import scdy.planservice.common.exceptions.BadRequestException;
-import scdy.planservice.common.exceptions.NotFoundException;
 import scdy.planservice.dto.MemberRequestDto;
 import scdy.planservice.dto.MemberResponseDto;
 import scdy.planservice.entity.Member;
 import scdy.planservice.entity.Plan;
 import scdy.planservice.enums.MemberRole;
+import scdy.planservice.exception.MemberNotFoundException;
+import scdy.planservice.exception.NotAllowedAuthException;
 import scdy.planservice.repository.MemberRepository;
 
 import java.util.List;
@@ -59,11 +59,10 @@ public class MemberService {
         Member member = memberRepository.findByIdOrElseThrow(memberId);
         List<Member> memberList = memberRepository.findByPlanId(member.getPlan().getPlanId());
         Member currentMember = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
-                () -> new NotFoundException("멤버가 존재하지 않습니다.")
-        );
+                () -> new MemberNotFoundException("멤버가 존재하지 않습니다."));
 
         if(!(currentMember.getMemberRole() == MemberRole.LEADER)){
-            throw new BadRequestException("리더만 수정할 수 있습니다.");
+            throw new NotAllowedAuthException("리더만 수정할 수 있습니다.");
         } // 사용자가 현재 플랜의 리더인지 확인
 
         /*
@@ -71,19 +70,19 @@ public class MemberService {
                 memberList.stream().anyMatch(m -> m.getMemberRole() == MemberRole.LEADER)){
             throw new BadRequestException("리더가 이미 존재합니다.");
         }*/
-        member.updateMember(MemberRole.LEADER); // 무조건 리더로만
+        member.updateMember(MemberRole.LEADER); // 무조건 리더 권한
 
         currentMember.updateMember(MemberRole.MEMBER); // 현재 리더를 일반 멤버로 전환
 
         return MemberResponseDto.from(member);
-    }  // **** 리더 양도 개념으로 생각해서 다시 짜야될 듯 ****
+    }
 
     // 멤버 삭제
     @Transactional
     public MemberResponseDto deleteMember(Long userId,Long memberId){
         Member member = memberRepository.findByIdOrElseThrow(memberId);
         if(!checkLeader(userId, memberId)){
-            throw new BadRequestException("리더만 삭제할 수 있습니다.");
+            throw new NotAllowedAuthException("리더만 삭제할 수 있습니다.");
         }
         memberRepository.deleteById(memberId);
 
@@ -92,11 +91,11 @@ public class MemberService {
 
     private boolean checkLeader(Long userId, Long planId){
         Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
-                ()-> new NotFoundException("Member Not Found"));
-        if (member.getMemberRole() == MemberRole.LEADER) {
+                ()-> new MemberNotFoundException("멤버가 존재하지 않습니다."));
+        if(member.getMemberRole() == MemberRole.LEADER) {
             return true;
         }
         return false;
-    } // 멤버 아이디를 받아오면 짱 쉽게 짜질 것 같은데
+    }
 
 }
