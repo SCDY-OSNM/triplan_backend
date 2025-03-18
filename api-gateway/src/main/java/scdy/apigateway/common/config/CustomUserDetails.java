@@ -13,20 +13,24 @@ import java.util.List;
 public class CustomUserDetails implements UserDetails {
 
     private final Long userId;
-    private final String role;
-    private final String nickname;
+    private final String userRole;
 
     @Builder
-    public CustomUserDetails(Long userId, String role,String nickname) {
+    public CustomUserDetails(Long userId, String userRole ) {
         this.userId = userId;
-        this.role = role;
-        this.nickname = nickname;
+        this.userRole = userRole;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+
+        if(userRole != null){
+            authorities.add(new SimpleGrantedAuthority("ROLE_"+userRole));
+        }
+        else {
+            return new ArrayList<>();
+        }
         return authorities;
     }
 
