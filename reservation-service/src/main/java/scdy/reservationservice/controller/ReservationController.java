@@ -38,6 +38,7 @@ public class ReservationController {
     }
 
     //예약 조회
+    //TODO:GET MAPPING 경로 수정
     @GetMapping()
     public ResponseEntity<ApiResponse<ReservationResponseDto>> getReservation(@RequestHeader("X-Authenticated-User") Long userId,
                                                                               @RequestHeader("X-User-Role") String role,

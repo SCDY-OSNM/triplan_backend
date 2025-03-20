@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EntityListeners(value = {AuditingEntityListener.class})
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
@@ -31,16 +32,20 @@ public class Review {
     @LastModifiedDate
     private LocalDateTime updateAt;
 
-    private int star;
+    private Integer star;
 
     @Builder
-
-    public Review(Long userId, Long contentsId, String content, LocalDateTime createAt, LocalDateTime updateAt, int star) {
+    public Review(Long userId, Long contentsId, String content, LocalDateTime createAt, LocalDateTime updateAt, Integer star) {
         this.userId = userId;
         this.contentsId = contentsId;
         this.content = content;
         this.createAt = createAt;
         this.updateAt = updateAt;
+        this.star = star;
+    }
+
+    public void update(String content, Integer star){
+        this.content = content;
         this.star = star;
     }
 }
