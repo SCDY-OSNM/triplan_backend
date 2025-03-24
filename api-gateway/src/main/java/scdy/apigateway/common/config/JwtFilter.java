@@ -78,8 +78,8 @@ public class JwtFilter implements WebFilter {
                 public HttpHeaders getHeaders() {
                     HttpHeaders headers = new HttpHeaders();
                     headers.addAll(super.getHeaders());
-                    headers.add("X-Authenticated-User", String.valueOf(userId));
-                    headers.add("X-User-Role", userRole);
+                    headers.set("X-Authenticated-User", String.valueOf(userId));
+                    headers.set("X-User-Role", userRole);
                     return headers;
                 }
             };
