@@ -1,5 +1,5 @@
 server:
-  port: 8761
+  port: 38761
 
 spring:
   application:
@@ -13,7 +13,7 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${TRIPLAN_EUREKA_URL}
   server:
     wait-time-in-ms-when-sync-empty: 0
     enable-self-preservation: true
