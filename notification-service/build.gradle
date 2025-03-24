@@ -38,13 +38,20 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-    //카프카
+    // 카프카
     implementation 'org.springframework.kafka:spring-kafka'
 
-    // Feign Client 관련 의존성 추가
+    // Feign Client
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+    // rabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    // firabase
+    implementation 'com.google.firebase:firebase-admin:8.1.0'
+
 }
 
 tasks.named('test') {
