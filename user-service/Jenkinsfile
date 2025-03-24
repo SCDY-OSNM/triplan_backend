@@ -9,7 +9,7 @@ pipeline {
         JWT_KEY = credentials('JWT_KEY')
         REDIS_URL = credentials('REDIS_URL')
         REDIS_PORT = credentials('REDIS_PORT')
-        MYSQL_URL = credentials('MYSQL_URL')
+        TRIPLAN_MYSQL_URL = credentials('TRIPLAN_MYSQL_URL')
         MYSQL_USER = credentials('MYSQL_USER')
         MYSQL_PASSWORD = credentials('MYSQL_PASSWORD')
         TRIPLAN_EUREKA_URL = credentials('TRIPLAN_EUREKA_URL')
@@ -131,7 +131,7 @@ pipeline {
                         --build-arg JWT_KEY=$JWT_KEY \
                         --build-arg REDIS_URL=$REDIS_URL \
                         --build-arg REDIS_PORT=$REDIS_PORT \
-                        --build-arg MYSQL_URL=$MYSQL_URL \
+                        --build-arg TRIPLAN_MYSQL_URL=TRIPLAN_MYSQL_URL \
                         --build-arg MYSQL_USER=$MYSQL_USER \
                         --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD \
                         --build-arg TRIPLAN_EUREKA_URL=$TRIPLAN_EUREKA_URL \
@@ -147,7 +147,7 @@ pipeline {
                         -e JWT_KEY=$JWT_KEY \
                         -e REDIS_URL=$REDIS_URL \
                         -e REDIS_PORT=$REDIS_PORT \
-                        -e MYSQL_URL=$MYSQL_URL \
+                        -e TRIPLAN_MYSQL_URL=TRIPLAN_MYSQL_URL \
                         -e MYSQL_USER=$MYSQL_USER \
                         -e MYSQL_PASSWORD=$MYSQL_PASSWORD \
                         -e TRIPLAN_EUREKA_URL=$TRIPLAN_EUREKA_URL \
