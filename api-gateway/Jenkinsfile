@@ -7,7 +7,7 @@ pipeline {
         LOCAL_PORT = "38080"
         // ✅ 환경 변수 설정
         JWT_KEY = credentials('JWT_KEY')
-        REDIS_HOST = credentials('REDIS_URL')
+        REDIS_URL = credentials('REDIS_URL')
         REDIS_PORT = credentials('REDIS_PORT')
         EUREKA_URL = credentials('EUREKA_URL')
 
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "✅ Jenkins 환경 변수 확인..."
-                    echo "🔍 REDIS_HOST: $REDIS_HOST"
+                    echo "🔍 REDIS_URL: $REDIS_URL"
                     echo "🔍 REDIS_PORT: $REDIS_PORT"
                 }
             }
