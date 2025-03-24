@@ -3,7 +3,7 @@ spring:
     name: api-gateway
   data:
     redis:
-      host: ${REDIS_HOST}
+      host: ${REDIS_URL}
       port: ${REDIS_PORT}
 
   cloud:
