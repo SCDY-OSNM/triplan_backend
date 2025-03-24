@@ -9,7 +9,7 @@ pipeline {
         JWT_KEY = credentials('JWT_KEY')
         REDIS_URL = credentials('REDIS_URL')
         REDIS_PORT = credentials('REDIS_PORT')
-        EUREKA_URL = credentials('EUREKA_URL')
+        TRIPLAN_EUREKA_URL = credentials('TRIPLAN_EUREKA_URL')
 
         TZ = "Asia/Seoul"
         SLACK_CHANNEL = "build-deploy"
@@ -128,7 +128,7 @@ pipeline {
                         --build-arg JWT_KEY=$JWT_KEY \
                         --build-arg REDIS_URL=$REDIS_URL \
                         --build-arg REDIS_PORT=$REDIS_PORT \
-                        --build-arg EUREKA_URL=$EUREKA_URL \
+                        --build-arg TRIPLAN_EUREKA_URL=TRIPLAN_EUREKA_URL \
                         api-gateway/
 
                     # 기존 컨테이너 종료 후 삭제
@@ -143,7 +143,7 @@ pipeline {
                         -e JWT_KEY=$JWT_KEY \
                         -e REDIS_URL=$REDIS_URL \
                         -e REDIS_PORT=$REDIS_PORT \
-                        -e EUREKA_URL=$EUREKA_URL \
+                        -e TRIPLAN_EUREKA_URL=TRIPLAN_EUREKA_URL \
                         $IMAGE_TAG
                     '''
 
