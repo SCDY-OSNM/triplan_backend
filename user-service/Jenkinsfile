@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     echo "✅ Jenkins 환경 변수 확인..."
-                    echo "🔍 REDIS_HOST: $REDIS_HOST"
+                    echo "🔍 REDIS_URL: $REDIS_URL"
                     echo "🔍 REDIS_PORT: $REDIS_PORT"
                 }
             }
