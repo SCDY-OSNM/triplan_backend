@@ -147,7 +147,7 @@ pipeline {
                         -e JWT_KEY=$JWT_KEY \
                         -e REDIS_URL=$REDIS_URL \
                         -e REDIS_PORT=$REDIS_PORT \
-                        -e TRIPLAN_MYSQL_URL=TRIPLAN_MYSQL_URL \
+                        -e TRIPLAN_MYSQL_URL=$TRIPLAN_MYSQL_URL \
                         -e MYSQL_USER=$MYSQL_USER \
                         -e MYSQL_PASSWORD=$MYSQL_PASSWORD \
                         -e TRIPLAN_EUREKA_URL=$TRIPLAN_EUREKA_URL \
