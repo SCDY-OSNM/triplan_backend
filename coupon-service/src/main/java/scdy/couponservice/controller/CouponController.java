@@ -37,10 +37,10 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("쿠폰 수정 성공", couponResponseDto));
     }
 
-    @GetMapping("/getCouponById")
-    public ResponseEntity<ApiResponse<CouponResponseDto>> getCouponById(@RequestBody CouponRequestDto dto) {
+    @GetMapping("/{couponId}")
+    public ResponseEntity<ApiResponse<CouponResponseDto>> getCouponById(@PathVariable("couponId") Long couponId) {
 
-        CouponResponseDto couponResponseDto = couponService.getCouponById(dto);
+        CouponResponseDto couponResponseDto = couponService.getCouponById(couponId);
         return ResponseEntity.ok(ApiResponse.success("쿠폰 조회 성공", couponResponseDto));
     }
 
@@ -52,15 +52,16 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("쿠폰 삭제 성공"));
     }
 
-    @PostMapping("/userCoupons")
-    public ResponseEntity<ApiResponse<UserCouponResponseDto>> issueCoupon(@RequestHeader("X-User-Role") String role,
-                                                                          @RequestBody UserCouponRequestDto dto) {
+    @PostMapping("/user-coupons/{couponId}")
+    public ResponseEntity<ApiResponse<UserCouponResponseDto>> issueCoupon(@RequestHeader("X-Authenticated-User") Long userId,
+                                                                          @RequestHeader("X-User-Role") String role,
+                                                                          @PathVariable("couponId") Long couponId) {
 
-        UserCouponResponseDto userCouponResponseDto = couponService.issueCoupon(dto, role);
+        UserCouponResponseDto userCouponResponseDto = couponService.issueCoupon(couponId, role, userId);
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 발급 성공", userCouponResponseDto));
     }
 
-    @GetMapping("/userCoupons/getById")
+    @GetMapping("/user-coupons/getById")
     public ResponseEntity<ApiResponse<UserCouponResponseDto>> readCoupon(@RequestHeader("X-Authenticated-User") Long userId,
                                                                          @RequestHeader("X-User-Role") String role,
                                                                          @RequestBody UserCouponRequestDto dto) {
@@ -69,7 +70,7 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 조회 성공", userCouponResponseDto));
     }
 
-    @GetMapping("/userCoupons/getByUserId/{userId}")
+    @GetMapping("/user-coupons/getByUserId/{userId}")
     public ResponseEntity<ApiResponse<List<UserCouponResponseDto>>> getUserCouponListByUserId(@RequestHeader("X-Authenticated-User") Long requestUserId,
                                                                                               @RequestHeader("X-User-Role") String role,
                                                                                               @PathVariable("userId") Long userId) {
@@ -78,7 +79,7 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 목록 조회 성공", userCouponResponseDtos));
     }
 
-    @PutMapping("/userCoupons")
+    @PatchMapping("/user-coupons")
     public ResponseEntity<ApiResponse<UserCouponResponseDto>> updateUserCoupon(@RequestHeader("X-Authenticated-User") Long userId,
                                                                                @RequestHeader("X-User-Role") String role,
                                                                                @RequestBody UserCouponRequestDto dto) {
@@ -87,7 +88,7 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 수정 성공", userCouponResponseDto));
     }
 
-    @DeleteMapping("/userCoupons")
+    @DeleteMapping("/user-coupons")
     public ResponseEntity<ApiResponse<Void>> deleteUserCoupon(@RequestHeader("X-User-Role") String role,
                                                               @RequestBody UserCouponRequestDto dto) {
 

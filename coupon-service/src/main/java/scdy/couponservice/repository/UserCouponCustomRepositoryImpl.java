@@ -8,6 +8,7 @@ import scdy.couponservice.entity.UserCoupon;
 import scdy.couponservice.exception.UserCouponNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -30,6 +31,14 @@ public class UserCouponCustomRepositoryImpl implements UserCouponCustomRepositor
                 .selectFrom(userCoupon)
                 .where(userCoupon.coupon.couponId.eq(couponId))
                 .fetch().stream().count();
+    }
+
+    @Override
+    public Optional<UserCoupon> findUserCouponByUserIdAndCouponId(Long userId, Long couponId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(userCoupon)
+                .where(userCoupon.userId.eq(userId), userCoupon.coupon.couponId.eq(couponId))
+                .fetchFirst());
     }
 
     @Override

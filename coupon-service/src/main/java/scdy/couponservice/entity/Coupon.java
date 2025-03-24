@@ -29,9 +29,11 @@ public class Coupon {
     private Long couponCode;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CouponType couponType;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private DiscountType discountType;
 
     @CreatedDate

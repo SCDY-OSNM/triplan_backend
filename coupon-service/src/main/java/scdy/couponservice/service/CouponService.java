@@ -97,8 +97,8 @@ public class CouponService {
     }
 
     //read coupon
-    public CouponResponseDto getCouponById(CouponRequestDto couponRequestDto){
-        Coupon coupon = getCoupon(couponRequestDto.getCouponId());
+    public CouponResponseDto getCouponById(Long couponId){
+        Coupon coupon = getCoupon(couponId);
 
         return CouponResponseDto.from(coupon);
     }
@@ -122,11 +122,11 @@ public class CouponService {
     //every user can issue "LIMIT" type coupon
     //"LIMIT" type coupon can issue amount less than "couponAmount"
     @Transactional
-    public UserCouponResponseDto issueCoupon(UserCouponRequestDto userCouponRequestDto, String userRole){
-        Coupon coupon = getCoupon(userCouponRequestDto.getCouponId());
+    public UserCouponResponseDto issueCoupon(Long couponId, String userRole, Long userId){
+        Coupon coupon = getCoupon(couponId);
 
         //ALL 쿠폰 발급시 관리자 권한 체크
-        if(!(checkIsAdmin(userRole) && coupon.getCouponType().equals(CouponType.ALL))){
+        if(!checkIsAdmin(userRole) && coupon.getCouponType().equals(CouponType.ALL)){
             throw new PermissionNotfoundException("쿠폰발급 권한이 없는 사용자입니다.");
         }
 
@@ -136,8 +136,13 @@ public class CouponService {
             throw new CouponAmountErrorException("쿠폰이 소진되었습니다");
         }
 
+        //check already have
+        if(userCouponRepository.findUserCouponByUserIdAndCouponId(userId, couponId).isPresent()){
+            throw new CouponAmountErrorException("이미 보유한 쿠폰입니다");
+        }
+
         UserCoupon userCoupon = UserCoupon.builder()
-                .userId(userCouponRequestDto.getUserId())
+                .userId(userId)
                 .coupon(coupon)
                 .isUsed(false)
                 .build();

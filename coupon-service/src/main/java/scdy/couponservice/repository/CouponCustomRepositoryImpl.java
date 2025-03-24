@@ -17,7 +17,7 @@ public class CouponCustomRepositoryImpl implements CouponCustomRepository {
     @Override
     public Coupon findByIdOrElseThrow(Long couponId) {
         Coupon result = queryFactory
-                .select(coupon)
+                .selectFrom(coupon)
                 .where(coupon.couponId.eq(couponId))
                 .fetchFirst();
 
