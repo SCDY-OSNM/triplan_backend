@@ -50,7 +50,7 @@ public class UserController {
         UserResponseDto user = userService.updateUser(userId, userRequestDto);
 
         return ResponseEntity.ok(
-                ApiResponse.success("수정 성공 ", user)
+                ApiResponse.success("사용자 정보 수정 성공 ", user)
         );
     }
 
@@ -60,7 +60,7 @@ public class UserController {
         userService.deleteUser(userId, userRequestDto.getPassword());
 
         return ResponseEntity.ok(
-                ApiResponse.success("탈퇴성공")
+                ApiResponse.success("회원 탈퇴 성공")
         );
     }
 
