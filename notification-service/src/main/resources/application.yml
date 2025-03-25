@@ -37,6 +37,7 @@ rabbitmq:
     name: NotificationQueue
   exchange:
     name: NotificationExchange
+
   routing:
     key : key
 

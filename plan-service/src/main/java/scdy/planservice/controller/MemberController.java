@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import scdy.planservice.common.advice.ApiResponse;
 import scdy.planservice.dto.MemberRequestDto;
 import scdy.planservice.dto.MemberResponseDto;
-import scdy.planservice.enums.MemberRole;
 import scdy.planservice.service.MemberService;
 
 import java.util.List;

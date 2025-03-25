@@ -1,10 +1,12 @@
 package scdy.notificationservice.service;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import scdy.notificationservice.dto.NotificationRequestDto;
+
 
 @Slf4j
 @Service
@@ -20,3 +22,4 @@ public class RabbitMQConsumer {
 
     }
 }
+

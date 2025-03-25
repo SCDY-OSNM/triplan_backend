@@ -40,7 +40,7 @@ public class RabbitMQConfig {
     private String routingKey;
 
     @Bean
-    public Queue queue(){
+    public Queue queue() {
         return new Queue(queueName, true, false, false);
     }
     @Bean

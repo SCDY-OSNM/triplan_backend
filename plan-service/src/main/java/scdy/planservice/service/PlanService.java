@@ -44,7 +44,7 @@ public class PlanService {
                 .build();
         planRepository.save(plan);
 
-        memberService.createLeader(userId, plan); // 서비스 내에서 서비스를 호출해도 괜찮은지
+        memberService.createLeader(userId, plan);
 
         return PlanResponseDto.from(plan);
     }

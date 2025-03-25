@@ -1,6 +1,7 @@
 package scdy.notificationservice.controller;
 
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import scdy.notificationservice.service.RabbitMQConsumer;
@@ -10,6 +11,7 @@ import scdy.notificationservice.service.RabbitMQProducer;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/v1/notifications")
+
 public class NotifyController {
     private final RabbitMQConsumer rabbitMQConsumer;
 
