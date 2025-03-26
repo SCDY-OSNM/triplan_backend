@@ -124,7 +124,9 @@ public class CouponService {
     //"LIMIT" type coupon can issue amount less than "couponAmount"
     @Transactional
     public UserCouponResponseDto issueCoupon(Long couponId, String userRole, Long userId){
-        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId);
+
+//        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId);
+        Coupon coupon = getCoupon(couponId);
 
         //ALL 쿠폰 발급시 관리자 권한 체크
         if(!checkIsAdmin(userRole) && coupon.getCouponType().equals(CouponType.ALL)){
@@ -204,7 +206,8 @@ public class CouponService {
     //Only ADMIN can delete userCoupon
     @Transactional
     public void deleteUserCoupon(Long userCouponId, String userRole){
-        Coupon coupon = couponRepository.findByIdWithPessimisticLock(userCouponId);
+//        Coupon coupon = couponRepository.findByIdWithPessimisticLock(userCouponId);
+        Coupon coupon = getCoupon(userCouponId);
         UserCoupon userCoupon = getUserCoupon(userCouponId);
 
         if(!checkIsAdmin(userRole)){

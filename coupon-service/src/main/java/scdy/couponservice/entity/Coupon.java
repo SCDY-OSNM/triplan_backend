@@ -65,6 +65,9 @@ public class Coupon {
 
     private Integer couponAmountRemaining;
 
+    @Version
+    private Long version;
+
     @Builder
     public Coupon(String couponName, Long couponCode, CouponType couponType, DiscountType discountType,
                   LocalDate issueDate, LocalDate expiryDate, Boolean available, Integer couponMinimum,

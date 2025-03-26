@@ -20,7 +20,7 @@ public class CouponCustomRepositoryImpl implements CouponCustomRepository {
         Coupon result = queryFactory
                 .selectFrom(coupon)
                 .where(coupon.couponId.eq(couponId))
-                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .setLockMode(LockModeType.OPTIMISTIC)
                 .fetchFirst();
 
         if(result == null) {
