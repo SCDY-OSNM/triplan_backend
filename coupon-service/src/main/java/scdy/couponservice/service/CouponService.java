@@ -203,12 +203,15 @@ public class CouponService {
     //delete UserCoupon
     //Only ADMIN can delete userCoupon
     @Transactional
-    public void deleteUserCoupon(UserCouponRequestDto userCouponRequestDto, String userRole){
-        UserCoupon userCoupon = getUserCoupon(userCouponRequestDto.getUserCouponId());
+    public void deleteUserCoupon(Long userCouponId, String userRole){
+        Coupon coupon = couponRepository.findByIdWithPessimisticLock(userCouponId);
+        UserCoupon userCoupon = getUserCoupon(userCouponId);
 
         if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("유저 쿠폰 삭제 권한이 없는 사용자입니다.");
         }
+
+        coupon.increaseCoupon();
 
         userCouponRepository.delete(userCoupon);
     }

@@ -90,6 +90,10 @@ public class Coupon {
         this.available = available;
     }
 
+    public void increaseCoupon(){
+        couponAmountRemaining++;
+    }
+
     public void decreaseCoupon(){
         couponAmountRemaining--;
     }

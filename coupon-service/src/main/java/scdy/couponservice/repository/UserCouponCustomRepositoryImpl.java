@@ -52,7 +52,7 @@ public class UserCouponCustomRepositoryImpl implements UserCouponCustomRepositor
     @Override
     public UserCoupon findByIdOrElseThrow(Long userCouponId) {
         UserCoupon result = queryFactory
-                .select(userCoupon)
+                .selectFrom(userCoupon)
                 .where(userCoupon.userCouponId.eq(userCouponId))
                 .fetchOne();
 

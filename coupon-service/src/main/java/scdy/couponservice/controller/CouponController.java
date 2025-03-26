@@ -88,11 +88,11 @@ public class CouponController {
         return ResponseEntity.ok(ApiResponse.success("유저 쿠폰 수정 성공", userCouponResponseDto));
     }
 
-    @DeleteMapping("/user-coupons")
+    @DeleteMapping("/user-coupons/{userCouponId}")
     public ResponseEntity<ApiResponse<Void>> deleteUserCoupon(@RequestHeader("X-User-Role") String role,
-                                                              @RequestBody UserCouponRequestDto dto) {
+                                                              @PathVariable("userCouponId") Long userCouponId) {
 
-        couponService.deleteUserCoupon(dto, role);
+        couponService.deleteUserCoupon(userCouponId, role);
         return ResponseEntity.noContent().build();
     }
 
