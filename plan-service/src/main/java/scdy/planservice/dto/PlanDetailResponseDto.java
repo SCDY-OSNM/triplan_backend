@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class PlanDetailResponseDto {
     private Long contentId;
 
-    private Plan plan;
+    private Long planId;
 
     private PlanDetailCategory planCategory;
 
@@ -31,9 +31,9 @@ public class PlanDetailResponseDto {
     private Integer planDetailDay;
 
     @Builder
-    public PlanDetailResponseDto(Long contentId, Plan plan, PlanDetailCategory planCategory, String planDetailName, String planDetailMemo, Long planDetailCost, LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay) {
+    public PlanDetailResponseDto(Long contentId, Long planId, PlanDetailCategory planCategory, String planDetailName, String planDetailMemo, Long planDetailCost, LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay) {
         this.contentId = contentId;
-        this.plan = plan;
+        this.planId = planId;
         this.planCategory = planCategory;
         this.planDetailName = planDetailName;
         this.planDetailMemo = planDetailMemo;
@@ -46,7 +46,7 @@ public class PlanDetailResponseDto {
     public static PlanDetailResponseDto from(PlanDetail planDetail){
         return PlanDetailResponseDto.builder()
                 .contentId(planDetail.getContentId())
-                .plan(planDetail.getPlan())
+                .planId(planDetail.getPlanId())
                 .planCategory(planDetail.getPlanDetailCategory())
                 .planDetailName(planDetail.getPlanDetailName())
                 .planDetailMemo(planDetail.getPlanDetailMemo())

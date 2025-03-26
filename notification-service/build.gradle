@@ -46,18 +46,15 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 
-<<<<<<< HEAD
     // rabbitMQ
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // firabase
     implementation 'com.google.firebase:firebase-admin:8.1.0'
 
-=======
     // rabbitMQ 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
->>>>>>> 708159e71076ffc1d4541690aeb6d925af928afb
 }
 
 tasks.named('test') {

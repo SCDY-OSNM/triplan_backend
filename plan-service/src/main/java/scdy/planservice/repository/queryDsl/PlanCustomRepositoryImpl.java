@@ -1,5 +1,6 @@
 package scdy.planservice.repository.queryDsl;
 
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ public class PlanCustomRepositoryImpl implements PlanCustomRepository{
     @Override
     public List<Plan> findByUserId(Long userId){
         return queryFactory
-                .select(plan)
+                .selectFrom(plan)
                 .where(plan.userId.eq(userId))
                 .fetch();
     }
@@ -29,7 +30,7 @@ public class PlanCustomRepositoryImpl implements PlanCustomRepository{
     @Override
     public List<Plan> findByPlace(Place place){
         return queryFactory
-                .select(plan)
+                .selectFrom(plan)
                 .where(plan.planPlace.contains(place))
                 .fetch();
     }
@@ -37,10 +38,14 @@ public class PlanCustomRepositoryImpl implements PlanCustomRepository{
     @Override
     public List<Plan> findByUserIdInMember(Long userId){
         return queryFactory
-                .select(member.plan)
-                .from(member)
-                .join(member.plan, plan) // queryDSL이 ManyToOne 필드를 자동 조인하지 않음.
-                .where(member.userId.eq(userId))
+                .selectFrom(plan)
+                .where(plan.planId.in(
+                        JPAExpressions
+                                .select(member.planId)
+                                .from(member)
+                                .where(member.userId.eq(userId))
+                ))
                 .fetch();
-    }
+    } // 현재 유저 아이디를 가지고 있는 멤버의 플랜 아이디로 플랜을 가져옴
+    // 대량의 데이터 조회시 join이 더 적절할 수 있음
 }

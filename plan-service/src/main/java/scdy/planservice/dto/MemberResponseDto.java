@@ -10,22 +10,22 @@ import scdy.planservice.enums.MemberRole;
 @Getter
 @NoArgsConstructor
 public class MemberResponseDto {
-    private Plan plan;
+    private Long planId;
 
     private Long userId;
 
     private MemberRole memberRole;
 
     @Builder
-    public MemberResponseDto(Plan plan, Long userId, MemberRole memberRole) {
-        this.plan = plan;
+    public MemberResponseDto(Long planId, Long userId, MemberRole memberRole) {
+        this.planId = planId;
         this.userId = userId;
         this.memberRole = memberRole;
     }
 
     public static MemberResponseDto from(Member member){
         return MemberResponseDto.builder()
-                .plan(member.getPlan())
+                .planId(member.getPlanId())
                 .userId(member.getUserId())
                 .memberRole(member.getMemberRole())
                 .build();

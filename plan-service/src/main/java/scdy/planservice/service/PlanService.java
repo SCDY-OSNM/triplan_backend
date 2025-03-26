@@ -7,16 +7,20 @@ import scdy.planservice.client.UserClient;
 import scdy.planservice.dto.*;
 import scdy.planservice.entity.Member;
 import scdy.planservice.entity.Plan;
+import scdy.planservice.entity.PlanDetail;
 import scdy.planservice.entity.PlanPlace;
 import scdy.planservice.enums.MemberRole;
 import scdy.planservice.enums.Place;
 import scdy.planservice.exception.MemberNotFoundException;
 import scdy.planservice.exception.NotAllowedAuthException;
 import scdy.planservice.repository.MemberRepository;
+import scdy.planservice.repository.PlanDetailRepository;
 import scdy.planservice.repository.PlanPlaceRepository;
 import scdy.planservice.repository.PlanRepository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ import java.util.List;
 public class PlanService {
     private final PlanRepository planRepository;
     private final PlanPlaceRepository planPlaceRepository;
+    private final PlanDetailRepository planDetailRepository;
     private final MemberRepository memberRepository;
 
     private final MemberService memberService;
@@ -44,7 +49,7 @@ public class PlanService {
                 .build();
         planRepository.save(plan);
 
-        memberService.createLeader(userId, plan);
+        memberService.createLeader(userId, plan.getPlanId());
 
         return PlanResponseDto.from(plan);
     }
@@ -75,10 +80,21 @@ public class PlanService {
     @Transactional
     public PlanResponseDto updatePlan(Long planId, PlanRequestDto planRequestDto, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
-        if(memberRepository.findByUserIdPlanId(planId, userId).isEmpty()) {
+
+        if(memberRepository.findByUserIdPlanId(userId, planId).isEmpty()) {
             throw new NotAllowedAuthException("멤버만 수정이 가능합니다.");
         }
-        plan.updatePlan(planRequestDto.getPlanTitle(), planRequestDto.getPlanStartAt(), planRequestDto.getPlanEndAt(), planRequestDto.getPlanPlace());
+
+        String updatedTitle = planRequestDto.getPlanTitle() != null
+                ? planRequestDto.getPlanTitle() : plan.getPlanTitle();
+        LocalDate updatedStartAt = planRequestDto.getPlanStartAt() != null
+                ? planRequestDto.getPlanStartAt() : plan.getPlanStartAt();
+        LocalDate updatedEndAt = planRequestDto.getPlanEndAt() != null
+                ? planRequestDto.getPlanEndAt() : plan.getPlanEndAt();
+        List<Place> updatedPlanPlace = planRequestDto.getPlanPlace() != null
+                ? planRequestDto.getPlanPlace() : plan.getPlanPlace();
+
+        plan.updatePlan(updatedTitle, updatedStartAt, updatedEndAt, updatedPlanPlace);
 
         return PlanResponseDto.from(plan);
     }
@@ -87,14 +103,29 @@ public class PlanService {
     @Transactional
     public PlanResponseDto deletePlan(Long planId, Long userId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
-        Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
+        PlanResponseDto responseDto = PlanResponseDto.from(plan);
+
+        memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
                 () -> new MemberNotFoundException("멤버가 존재하지 않습니다."));
 
         if(!checkLeader(userId, planId)) {
             throw new NotAllowedAuthException("리더만 삭제가 가능합니다.");
         }
+
+        List<Member> members = memberRepository.findByPlanId(planId);
+        if (!members.isEmpty()) {
+            for (Member member : members) {
+                memberRepository.deleteById(member.getMemberId());
+            }
+        }
+        List<PlanDetail> planDetails = planDetailRepository.findByPlanId(planId);
+        if (!planDetails.isEmpty()) {
+            for (PlanDetail planDetail : planDetails) {
+                planDetailRepository.deleteById(planDetail.getPlanDetailId());
+            }
+        }
         planRepository.deleteById(planId);
-        return PlanResponseDto.from(plan);
+        return responseDto;
     }
 
     // 현재 사용자 별 일정 목록 (공/비공 고려x)
@@ -109,7 +140,7 @@ public class PlanService {
     public PlanResponseDto updatePublic(Long userId, Long planId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);
 
-        if(checkLeader(userId, planId)){
+        if(!checkLeader(userId, planId)){
             throw new NotAllowedAuthException("리더만 전환이 가능합니다.");
         }
         if(plan.getIsPublic()==Boolean.TRUE){
@@ -152,10 +183,8 @@ public class PlanService {
     private boolean checkLeader(Long userId, Long planId){
         Member member = memberRepository.findByUserIdPlanId(userId, planId).orElseThrow(
                 ()-> new MemberNotFoundException("멤버가 존재하지 않습니다."));
-        if(member.getMemberRole()== MemberRole.LEADER) {
-            return true;
-        }
-        return false;
+        System.out.println("Checking leader - userId: " + userId + ", planId: " + planId + ", role: " + member.getMemberRole());
+        return member.getMemberRole() == MemberRole.LEADER;
     }
 
 }

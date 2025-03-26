@@ -18,8 +18,8 @@ public class PlanDetailCustomRepositoryImpl implements PlanDetailCustomRepositor
     @Override
     public List<PlanDetail> findByPlanId(Long planId){
         return queryFactory
-                .select(planDetail)
-                .where(planDetail.plan.planId.eq(planId))
+                .selectFrom(planDetail)
+                .where(planDetail.planId.eq(planId))
                 .fetch();
     }
 }

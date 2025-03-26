@@ -1,6 +1,7 @@
 package scdy.planservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.shaded.com.google.protobuf.Api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import scdy.planservice.common.advice.ApiResponse;
@@ -26,31 +27,37 @@ public class PlanController {
     }
 
     @GetMapping("/{planId}")
-    public ResponseEntity<ApiResponse<PlanResponseDto>> readPlan(@RequestHeader("X-Authenticated-User") Long userId, @PathVariable Long planId){
+    public ResponseEntity<ApiResponse<PlanResponseDto>> readPlan(@RequestHeader("X-Authenticated-User") Long userId, @PathVariable("planId") Long planId){
         PlanResponseDto planResponseDto = planService.readPlan(planId, userId);
         return ResponseEntity.ok(ApiResponse.success("플랜 조회 완료", planResponseDto));
     }
 
+    @GetMapping("/myplan")
+    public ResponseEntity<ApiResponse<List<PlanResponseDto>>> readMyPlan(@RequestHeader("X-Authenticated-User") Long userId){
+        List<PlanResponseDto> planResponseDtoList = planService.readMyPlan(userId);
+        return ResponseEntity.ok(ApiResponse.success("내 플랜 조회 완료", planResponseDtoList));
+    }
+
     @PutMapping("/{planId}")
-    public ResponseEntity<ApiResponse<PlanResponseDto>> updatePlan(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable Long planId, @RequestBody PlanRequestDto planRequestDto){
+    public ResponseEntity<ApiResponse<PlanResponseDto>> updatePlan(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable("planId") Long planId, @RequestBody PlanRequestDto planRequestDto){
         PlanResponseDto planResponseDto = planService.updatePlan(planId, planRequestDto, userId);
         return ResponseEntity.ok(ApiResponse.success("플랜 수정 완료", planResponseDto));
     }
 
     @DeleteMapping("/{planId}")
-    public ResponseEntity<ApiResponse<PlanResponseDto>> deletePlan(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable Long planId){
+    public ResponseEntity<ApiResponse<PlanResponseDto>> deletePlan(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable("planId") Long planId){
         PlanResponseDto planResponseDto = planService.deletePlan(planId, userId);
         return ResponseEntity.ok(ApiResponse.success("플랜 삭제 완료", planResponseDto));
     }
 
     @PatchMapping("/public/{planId}")
-    public ResponseEntity<ApiResponse<PlanResponseDto>> updatePlanPublic(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable Long planId){
+    public ResponseEntity<ApiResponse<PlanResponseDto>> updatePlanPublic(@RequestHeader ("X-Authenticated-User") Long userId, @PathVariable("planId") Long planId){
         PlanResponseDto planResponseDto = planService.updatePublic(userId, planId);
         return ResponseEntity.ok(ApiResponse.success("공개 / 비공개 전환 완료", planResponseDto));
     }
 
     @GetMapping("/planlist/{localname}")
-    public ResponseEntity<ApiResponse<List<PlanResponseDto>>> getLocalPlanList(@PathVariable Place place){
+    public ResponseEntity<ApiResponse<List<PlanResponseDto>>> getLocalPlanList(@PathVariable("localname") Place place){
         List<PlanResponseDto> planResponseDto = planService.readPlanByPlace(place);
         return ResponseEntity.ok(ApiResponse.success("지역 플랜 조회 완료", planResponseDto));
     }

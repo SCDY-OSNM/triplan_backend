@@ -16,14 +16,14 @@ public class PlanDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long planDetailId;
 
-    @ManyToOne
-    @JoinColumn(name = "planId", referencedColumnName = "planId")
-    private Plan plan;
+    @Column(nullable = false)
+    private Long planId;
 
     @Column(nullable = false)
     private Long contentId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PlanDetailCategory planDetailCategory;
 
     @Column(nullable = false)
@@ -45,11 +45,11 @@ public class PlanDetail {
     private Integer planDetailDay;
 
     @Builder
-    public PlanDetail(Long contentId, Plan plan, PlanDetailCategory planDetailCategory,
+    public PlanDetail(Long contentId, Long planId, PlanDetailCategory planDetailCategory,
                       String planDetailName, String planDetailMemo, Long planDetailCost,
                       LocalDateTime planDetailTime, Integer planDetailTimeLine, Integer planDetailDay){
         this.contentId = contentId;
-        this.plan = plan;
+        this.planId = planId;
         this.planDetailCategory = planDetailCategory;
         this.planDetailName = planDetailName;
         this.planDetailMemo = planDetailMemo;

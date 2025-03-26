@@ -12,6 +12,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class PlanResponseDto {
+    private Long planId;
+
     private String planTitle;
 
     private LocalDate planStartAt;
@@ -26,7 +28,8 @@ public class PlanResponseDto {
 
     @Builder
 
-    public PlanResponseDto(String planTitle, LocalDate planStartAt, LocalDate planEndAt, Boolean isPublic, Long userId, List<Place> planPlace) {
+    public PlanResponseDto(Long planId, String planTitle, LocalDate planStartAt, LocalDate planEndAt, Boolean isPublic, Long userId, List<Place> planPlace) {
+        this.planId = planId;
         this.planTitle = planTitle;
         this.planStartAt = planStartAt;
         this.planEndAt = planEndAt;
@@ -37,6 +40,7 @@ public class PlanResponseDto {
 
     public static PlanResponseDto from(Plan plan){
         return PlanResponseDto.builder()
+                .planId(plan.getPlanId())
                 .planTitle(plan.getPlanTitle())
                 .planStartAt(plan.getPlanStartAt())
                 .planEndAt(plan.getPlanEndAt())

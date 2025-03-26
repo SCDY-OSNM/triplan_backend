@@ -21,7 +21,6 @@ public class Plan {
     @Column(nullable = false)
     private String planTitle;
 
-    @Column(nullable = false)
     private LocalDate planStartAt;
 
     private LocalDate planEndAt;
@@ -32,7 +31,8 @@ public class Plan {
     @Column(nullable = false)
     private Long userId;
 
-    @ElementCollection
+    @ElementCollection//(fetch = FetchType.LAZY)
+    @CollectionTable(name = "plan_places", joinColumns = @JoinColumn(name = "plan_id"))
     @Enumerated(EnumType.STRING)
     private List<Place> planPlace;
 
@@ -43,6 +43,7 @@ public class Plan {
         this.planStartAt = planStartAt;
         this.planEndAt = planEndAt;
         this.isPublic = isPublic;
+        this.userId = userId;
         this.planPlace = planPlace;
     }
 
