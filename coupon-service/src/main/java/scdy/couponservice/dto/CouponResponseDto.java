@@ -38,12 +38,14 @@ public class CouponResponseDto {
 
     private Integer discountPercentage;
 
-    private Integer couponAmount;
+    private Integer couponAmountTotal;
+
+    private Integer couponAmountRemaining;
 
     @Builder
     public CouponResponseDto(Long couponId, String couponName, Long couponCode, CouponType couponType, DiscountType discountType,
                              LocalDate issueDate, LocalDate expiryDate, Boolean available, Integer couponMinimum,
-                             Integer couponMaximum, Integer discountPrice, Integer discountPercentage, Integer couponAmount) {
+                             Integer couponMaximum, Integer discountPrice, Integer discountPercentage, Integer couponAmountTotal, Integer couponAmountRemaining) {
         this.couponId = couponId;
         this.couponName = couponName;
         this.couponCode = couponCode;
@@ -56,7 +58,8 @@ public class CouponResponseDto {
         this.couponMaximum = couponMaximum;
         this.discountPrice = discountPrice;
         this.discountPercentage = discountPercentage;
-        this.couponAmount = couponAmount;
+        this.couponAmountTotal = couponAmountTotal;
+        this.couponAmountRemaining = couponAmountRemaining;
     }
 
 
@@ -74,7 +77,8 @@ public class CouponResponseDto {
                 coupon.getCouponMaximum(),
                 coupon.getDiscountPrice(),
                 coupon.getDiscountPercentage(),
-                coupon.getCouponAmount()
+                coupon.getCouponAmountTotal(),
+                coupon.getCouponAmountRemaining()
         );
     }
 }

@@ -41,7 +41,7 @@ public class CouponService {
         }
 
         boolean isLimit = couponRequestDto.getCouponType().equals(CouponType.LIMITED);
-        boolean isCouponAmountNull = couponRequestDto.getCouponAmount() == null;
+        boolean isCouponAmountNull = couponRequestDto.getCouponAmountTotal() == null;
 
         if(isLimit && isCouponAmountNull){
             throw new CouponAmountNullException("LIMIT 쿠폰은 쿠폰 발급 개수가 필수입니다.");
@@ -68,7 +68,8 @@ public class CouponService {
                 .couponMaximum(couponRequestDto.getCouponMaximum())
                 .discountPrice(couponRequestDto.getDiscountPrice())
                 .discountPercentage(couponRequestDto.getDiscountPercentage())
-                .couponAmount(couponRequestDto.getCouponAmount())
+                .couponAmountTotal(couponRequestDto.getCouponAmountTotal())
+                .couponAmountRemaining(couponRequestDto.getCouponAmountTotal())
                 .build();
 
         couponRepository.save(coupon);
@@ -123,7 +124,7 @@ public class CouponService {
     //"LIMIT" type coupon can issue amount less than "couponAmount"
     @Transactional
     public UserCouponResponseDto issueCoupon(Long couponId, String userRole, Long userId){
-        Coupon coupon = getCoupon(couponId);
+        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId);
 
         //ALL 쿠폰 발급시 관리자 권한 체크
         if(!checkIsAdmin(userRole) && coupon.getCouponType().equals(CouponType.ALL)){
@@ -132,14 +133,16 @@ public class CouponService {
 
         //TODO: 추후 락 구현 필요
         //check amount
-        if(coupon.getCouponAmount() <= userCouponRepository.getUserCouponCountByCouponId(coupon.getCouponId())){
-            throw new CouponAmountErrorException("쿠폰이 소진되었습니다");
+        if (coupon.getCouponAmountRemaining() <= 0) {
+            throw new CouponAmountErrorException("쿠폰이 소진되었습니다.");
         }
 
         //check already have
         if(userCouponRepository.findUserCouponByUserIdAndCouponId(userId, couponId).isPresent()){
             throw new CouponAmountErrorException("이미 보유한 쿠폰입니다");
         }
+
+        coupon.decreaseCoupon();
 
         UserCoupon userCoupon = UserCoupon.builder()
                 .userId(userId)

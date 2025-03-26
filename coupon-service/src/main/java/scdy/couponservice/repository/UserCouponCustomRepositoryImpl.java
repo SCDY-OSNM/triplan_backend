@@ -1,7 +1,10 @@
 package scdy.couponservice.repository;
 
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import scdy.couponservice.entity.QUserCoupon;
 import scdy.couponservice.entity.UserCoupon;
@@ -10,6 +13,7 @@ import scdy.couponservice.exception.UserCouponNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Repository
 public class UserCouponCustomRepositoryImpl implements UserCouponCustomRepository {
@@ -27,10 +31,14 @@ public class UserCouponCustomRepositoryImpl implements UserCouponCustomRepositor
 
     @Override
     public Long getUserCouponCountByCouponId(Long couponId) {
-        return queryFactory
-                .selectFrom(userCoupon)
+        Long num = queryFactory
+                .select(Wildcard.count)
+                .from(userCoupon)
                 .where(userCoupon.coupon.couponId.eq(couponId))
-                .fetch().stream().count();
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne();
+        log.info("발급된 쿠폰 수 :{}", num.toString());
+        return num;
     }
 
     @Override

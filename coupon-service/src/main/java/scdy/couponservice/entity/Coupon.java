@@ -61,12 +61,14 @@ public class Coupon {
     private Integer discountPercentage;
 
     //선착순 쿠폰 발급 개수
-    private Integer couponAmount;
+    private Integer couponAmountTotal;
+
+    private Integer couponAmountRemaining;
 
     @Builder
     public Coupon(String couponName, Long couponCode, CouponType couponType, DiscountType discountType,
                   LocalDate issueDate, LocalDate expiryDate, Boolean available, Integer couponMinimum,
-                  Integer couponMaximum, Integer discountPrice, Integer discountPercentage, Integer couponAmount) {
+                  Integer couponMaximum, Integer discountPrice, Integer discountPercentage, Integer couponAmountTotal, Integer couponAmountRemaining) {
         this.couponName = couponName;
         this.couponCode = couponCode;
         this.couponType = couponType;
@@ -78,12 +80,17 @@ public class Coupon {
         this.couponMaximum = couponMaximum;
         this.discountPrice = discountPrice;
         this.discountPercentage = discountPercentage;
-        this.couponAmount = couponAmount;
+        this.couponAmountTotal = couponAmountTotal;
+        this.couponAmountRemaining = couponAmountRemaining;
     }
 
     public void updateCoupon(String couponName, LocalDate expiryDate, Boolean available){
         this.couponName = couponName;
         this.expiryDate = expiryDate;
         this.available = available;
+    }
+
+    public void decreaseCoupon(){
+        couponAmountRemaining--;
     }
 }
