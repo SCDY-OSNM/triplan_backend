@@ -9,15 +9,15 @@ import scdy.planservice.enums.MemberRole;
 @Getter
 @NoArgsConstructor
 public class MemberRequestDto {
-    private Plan plan;
+    private Long planId;
 
     private Long userId;
 
     private MemberRole memberRole;
 
     @Builder
-    public MemberRequestDto(Plan plan, Long userId, MemberRole memberRole) {
-        this.plan = plan;
+    public MemberRequestDto(Long planId, Long userId, MemberRole memberRole) {
+        this.planId = planId;
         this.userId = userId;
         this.memberRole = memberRole;
     }

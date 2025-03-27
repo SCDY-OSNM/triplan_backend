@@ -219,3 +219,5 @@ gradle-app.setting
 /src/main/generated/
 
 elk/elasticsearch/**
+
+node_modules/

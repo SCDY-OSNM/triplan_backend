@@ -16,20 +16,19 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    @Column(nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "planId", referencedColumnName = "planId")
-    private Plan plan;
+    @Column
+    private Long planId;
 
     @Column(nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "member_role", nullable = false)
+    @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
     @Builder
-    public Member(Plan plan, Long userId, MemberRole memberRole){
-        this.plan = plan;
+    public Member(Long planId, Long userId, MemberRole memberRole){
+        this.planId = planId;
         this.userId = userId;
         this.memberRole = memberRole;
     }

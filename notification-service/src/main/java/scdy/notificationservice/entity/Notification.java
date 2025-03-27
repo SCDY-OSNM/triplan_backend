@@ -23,6 +23,9 @@ public class Notification {
     private Long userId;
 
     @Column(nullable = false)
+    private String noticeTitle;
+
+    @Column(nullable = false)
     private String noticeContents;
 
     @Column(nullable = false)
@@ -32,8 +35,9 @@ public class Notification {
     private Boolean isChecked;
 
     @Builder
-    public Notification(Long userId, String noticeContents, LocalDateTime noticedAt, Boolean isChecked){
+    public Notification(Long userId, String noticeTitle, String noticeContents, LocalDateTime noticedAt, Boolean isChecked){
         this.userId = userId;
+        this.noticeTitle = noticeTitle;
         this.noticeContents = noticeContents;
         this.noticedAt = noticedAt;
         this.isChecked = isChecked;

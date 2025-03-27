@@ -19,8 +19,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository{
     @Override
     public List<Member> findByPlanId(Long planId) {
         return queryFactory
-                .select(member)
-                .where(member.plan.planId.eq(planId))
+                .selectFrom(member)
+                .where(member.planId.eq(planId))
                 .fetch();
     }
 
@@ -29,8 +29,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository{
 
         return Optional.ofNullable(
                 queryFactory
-                .select(member)
-                .where(member.memberId.eq(planId)
+                .selectFrom(member)
+                .where(member.planId.eq(planId)
                         .and(member.userId.eq(userId)))
                 .fetchOne());
     }

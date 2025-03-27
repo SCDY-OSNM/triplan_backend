@@ -12,6 +12,7 @@ import scdy.planservice.repository.MemberRepository;
 import scdy.planservice.repository.PlanDetailRepository;
 import scdy.planservice.repository.PlanRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,11 +25,11 @@ public class PlanDetailService {
 
     // 세부 일정 생성
     @Transactional
-    public PlanDetailResponseDto createPlanDetail(Long planId, PlanDetailRequestDto planDetailRequestDto){
-        planRepository.findByIdOrElseThrow(planId);
-        Plan plan = planRepository.findByIdOrElseThrow(planId);
+    public PlanDetailResponseDto createPlanDetail(PlanDetailRequestDto planDetailRequestDto){
+        planRepository.findByIdOrElseThrow(planDetailRequestDto.getPlanId());
+
         PlanDetail planDetail = PlanDetail.builder()
-                .plan(plan)
+                .planId(planDetailRequestDto.getPlanId())
                 .contentId(planDetailRequestDto.getContentId())
                 .planDetailCategory(planDetailRequestDto.getPlanCategory())
                 .planDetailName(planDetailRequestDto.getPlanDetailName())
@@ -63,7 +64,7 @@ public class PlanDetailService {
     @Transactional
     public PlanDetailResponseDto updatePlanDetail(Long userId, Long planDetailId, Integer planDetailtimeLine, Integer planDetailDay){
         PlanDetail planDetail = planDetailRepository.findByPlanDetailIdOrElseThrow(planDetailId);
-        if(!isMember(userId, planDetail.getPlan().getPlanId())){
+        if(!isMember(userId, planDetail.getPlanId())){
             throw new NotAllowedAuthException("멤버만 수정할 수 있습니다.");
         }
         planDetail.updatePlanDetailTimeLine(planDetailtimeLine, planDetailDay);
@@ -76,10 +77,19 @@ public class PlanDetailService {
     @Transactional
     public PlanDetailResponseDto updatePlanDetailContent(Long userId, Long planDetailId, PlanDetailRequestDto planDetailRequestDto){
         PlanDetail planDetail = planDetailRepository.findByPlanDetailIdOrElseThrow(planDetailId);
-        if(!isMember(userId, planDetail.getPlan().getPlanId())){
+        if(!isMember(userId, planDetail.getPlanId())){
             throw new NotAllowedAuthException("멤버만 수정할 수 있습니다.");
         }
-        planDetail.updatePlanDetail(planDetailRequestDto.getPlanDetailName(), planDetailRequestDto.getPlanDetailMemo(), planDetailRequestDto.getPlanDetailTime());
+        String planDetailName = planDetailRequestDto.getPlanDetailName() != null
+                ? planDetailRequestDto.getPlanDetailName() : planDetail.getPlanDetailName();
+
+        String planDetailMemo = planDetailRequestDto.getPlanDetailMemo() != null
+                ? planDetailRequestDto.getPlanDetailMemo() : planDetail.getPlanDetailMemo();
+
+        LocalDateTime planDetailTime = planDetailRequestDto.getPlanDetailTime() != null
+                ? planDetailRequestDto.getPlanDetailTime() : planDetail.getPlanDetailTime();
+
+        planDetail.updatePlanDetail(planDetailName, planDetailMemo, planDetailTime);
         return PlanDetailResponseDto.from(planDetail);
     }
 
@@ -87,7 +97,7 @@ public class PlanDetailService {
     @Transactional
     public PlanDetailResponseDto deletePlanDetail(Long userId, Long planDetailId){
         PlanDetail planDetail = planDetailRepository.findByPlanDetailIdOrElseThrow(planDetailId);
-        if(memberRepository.findByUserIdPlanId(userId, planDetail.getPlan().getPlanId()).isEmpty()){
+        if(memberRepository.findByUserIdPlanId(userId, planDetail.getPlanId()).isEmpty()){
             throw new NotAllowedAuthException("멤버만 삭제할 수 있습니다");
         }
         planDetailRepository.deleteById(planDetailId);
@@ -103,6 +113,6 @@ public class PlanDetailService {
     }
 
     private Boolean isMember(Long userId, Long planId){
-        return memberRepository.findByUserIdPlanId(userId, userId).isPresent();
+        return memberRepository.findByUserIdPlanId(userId, planId).isPresent();
     }
 }
