@@ -2,6 +2,9 @@ package scdy.couponservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scdy.couponservice.dto.CouponRequestDto;
@@ -122,6 +125,11 @@ public class CouponService {
     //Only Admin can issue "ALL" type coupon
     //every user can issue "LIMIT" type coupon
     //"LIMIT" type coupon can issue amount less than "couponAmount"
+    @Retryable(
+            value = ObjectOptimisticLockingFailureException.class, // 낙관적 락 충돌 예외
+            maxAttempts = 3,  // 최대 3번 재시도
+            backoff = @Backoff(delay = 100) // 100ms 대기 후 재시도
+    )
     @Transactional
     public UserCouponResponseDto issueCoupon(Long couponId, String userRole, Long userId){
 
