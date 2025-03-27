@@ -114,4 +114,31 @@ class BoardController(private val boardService: BoardService) {
         return ResponseEntity.ok(ApiResponse.success("좋아요 개수 조회 성공", numOfLikes))
     }
 
+    @GetMapping("/search/title")
+    fun searchByTitle(@RequestParam("q", defaultValue = "") title: String,
+                      pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByTitle(title, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("제목으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/search/contents")
+    fun searchByContents(@RequestParam("q", defaultValue = "") contents: String,
+                         pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByContents(contents, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("내용으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/search/hashtag")
+    fun searchByHashtag(@RequestParam("q", defaultValue = "") hashTag: String,
+                        pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByHashTag(hashTag, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("해시태그로 검색 성공", boardPage))
+    }
+
 }
