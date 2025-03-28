@@ -66,4 +66,60 @@ class BoardCustomRepositoryImpl(
         }
         return result
     }
+
+    override fun searchBoardByTitle(title: String, pageable: Pageable): Page<Board> {
+
+        val results = queryFactory
+            .selectFrom(board)
+            .where(board.boardTitle.like("%$title%"))
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+        val total = queryFactory
+            .select(board.count())
+            .from(board)
+            .where(board.boardTitle.like("%$title%"))
+            .fetchOne() ?: 0L
+
+        return PageImpl(results, pageable, total)
+
+    }
+
+    override fun searchBoardByContents(contents: String, pageable: Pageable): Page<Board> {
+
+        val results = queryFactory
+            .selectFrom(board)
+            .where(board.boardContents.like("%$contents%"))
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+        val total = queryFactory
+            .select(board.count())
+            .from(board)
+            .where(board.boardContents.like("%$contents%"))
+            .fetchOne() ?: 0L
+
+        return PageImpl(results, pageable, total)
+
+    }
+
+    override fun searchBoardByHashtag(hashtag: String, pageable: Pageable): Page<Board> {
+
+        val results = queryFactory
+            .selectFrom(board)
+            .where(board.boardHashtag.like("%$hashtag%"))
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+        val total = queryFactory
+            .select(board.count())
+            .from(board)
+            .where(board.boardHashtag.like("%$hashtag%"))
+            .fetchOne() ?: 0L
+
+        return PageImpl(results, pageable, total)
+    }
 }

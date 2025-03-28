@@ -2,6 +2,9 @@ package scdy.couponservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scdy.couponservice.dto.CouponRequestDto;
@@ -41,7 +44,7 @@ public class CouponService {
         }
 
         boolean isLimit = couponRequestDto.getCouponType().equals(CouponType.LIMITED);
-        boolean isCouponAmountNull = couponRequestDto.getCouponAmount() == null;
+        boolean isCouponAmountNull = couponRequestDto.getCouponAmountTotal() == null;
 
         if(isLimit && isCouponAmountNull){
             throw new CouponAmountNullException("LIMIT 쿠폰은 쿠폰 발급 개수가 필수입니다.");
@@ -68,7 +71,8 @@ public class CouponService {
                 .couponMaximum(couponRequestDto.getCouponMaximum())
                 .discountPrice(couponRequestDto.getDiscountPrice())
                 .discountPercentage(couponRequestDto.getDiscountPercentage())
-                .couponAmount(couponRequestDto.getCouponAmount())
+                .couponAmountTotal(couponRequestDto.getCouponAmountTotal())
+                .couponAmountRemaining(couponRequestDto.getCouponAmountTotal())
                 .build();
 
         couponRepository.save(coupon);
@@ -121,8 +125,15 @@ public class CouponService {
     //Only Admin can issue "ALL" type coupon
     //every user can issue "LIMIT" type coupon
     //"LIMIT" type coupon can issue amount less than "couponAmount"
+    @Retryable(
+            value = ObjectOptimisticLockingFailureException.class, // 낙관적 락 충돌 예외
+            maxAttempts = 3,  // 최대 3번 재시도
+            backoff = @Backoff(delay = 100) // 100ms 대기 후 재시도
+    )
     @Transactional
     public UserCouponResponseDto issueCoupon(Long couponId, String userRole, Long userId){
+
+//        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId);
         Coupon coupon = getCoupon(couponId);
 
         //ALL 쿠폰 발급시 관리자 권한 체크
@@ -132,14 +143,16 @@ public class CouponService {
 
         //TODO: 추후 락 구현 필요
         //check amount
-        if(coupon.getCouponAmount() <= userCouponRepository.getUserCouponCountByCouponId(coupon.getCouponId())){
-            throw new CouponAmountErrorException("쿠폰이 소진되었습니다");
+        if (coupon.getCouponAmountRemaining() <= 0) {
+            throw new CouponAmountErrorException("쿠폰이 소진되었습니다.");
         }
 
         //check already have
         if(userCouponRepository.findUserCouponByUserIdAndCouponId(userId, couponId).isPresent()){
             throw new CouponAmountErrorException("이미 보유한 쿠폰입니다");
         }
+
+        coupon.decreaseCoupon();
 
         UserCoupon userCoupon = UserCoupon.builder()
                 .userId(userId)
@@ -200,12 +213,16 @@ public class CouponService {
     //delete UserCoupon
     //Only ADMIN can delete userCoupon
     @Transactional
-    public void deleteUserCoupon(UserCouponRequestDto userCouponRequestDto, String userRole){
-        UserCoupon userCoupon = getUserCoupon(userCouponRequestDto.getUserCouponId());
+    public void deleteUserCoupon(Long userCouponId, String userRole){
+//        Coupon coupon = couponRepository.findByIdWithPessimisticLock(userCouponId);
+        Coupon coupon = getCoupon(userCouponId);
+        UserCoupon userCoupon = getUserCoupon(userCouponId);
 
         if(!checkIsAdmin(userRole)){
             throw new PermissionNotfoundException("유저 쿠폰 삭제 권한이 없는 사용자입니다.");
         }
+
+        coupon.increaseCoupon();
 
         userCouponRepository.delete(userCoupon);
     }

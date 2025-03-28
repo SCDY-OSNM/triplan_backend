@@ -167,6 +167,29 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
         return boardLikeRepository.findNumberByBoardId(boardId)
     }
 
+    //search by title
+    fun searchByTitle(title: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result =  boardRepository.searchBoardByTitle(title, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
+
+    //search by contents
+    fun searchByContents(contents: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result =  boardRepository.searchBoardByContents(contents, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
+
+    //search by hashtag
+    fun searchByHashTag(hashTag: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result = boardRepository.searchBoardByHashtag(hashTag, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
 
     //permission check
     fun isAdmin(userRole: String): Boolean {

@@ -41,5 +41,7 @@ public class CouponRequestDto {
 
     private Integer discountPercentage;
 
-    private Integer couponAmount;
+    private Integer couponAmountTotal;
+
+    private Integer couponAmountRemaining;
 }

@@ -11,4 +11,10 @@ interface BoardCustomRepository {
     fun findBoardByUserId(userId: Long, pageable: Pageable): Page<Board>
 
     fun findByIdOrElseThrow(boardId: Long): Board
+
+    fun searchBoardByTitle(title: String, pageable: Pageable): Page<Board>
+
+    fun searchBoardByContents(contents: String, pageable: Pageable): Page<Board>
+
+    fun searchBoardByHashtag(hashtag: String, pageable: Pageable): Page<Board>
 }

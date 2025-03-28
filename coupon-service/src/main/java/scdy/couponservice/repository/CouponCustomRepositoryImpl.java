@@ -1,6 +1,7 @@
 package scdy.couponservice.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import scdy.couponservice.entity.Coupon;
@@ -13,6 +14,21 @@ public class CouponCustomRepositoryImpl implements CouponCustomRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QCoupon coupon = QCoupon.coupon;
+
+    @Override
+    public Coupon findByIdWithPessimisticLock(Long couponId) {
+        Coupon result = queryFactory
+                .selectFrom(coupon)
+                .where(coupon.couponId.eq(couponId))
+                .setLockMode(LockModeType.OPTIMISTIC)
+                .fetchFirst();
+
+        if(result == null) {
+            throw new CouponNotFoundException("존재하지 않는 쿠폰입니다");
+        }
+
+        return result;
+    }
 
     @Override
     public Coupon findByIdOrElseThrow(Long couponId) {
