@@ -4,8 +4,10 @@ import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import scdy.boardservice.elasticsearch.BoardDocument
 import scdy.boardservice.enums.BoardCategory
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
@@ -40,6 +42,19 @@ class Board(
         this.boardTitle = boardTitle
         this.boardContents = boardContents
         this.boardHashtag = boardHashtag
+    }
+
+    fun toDocument(): BoardDocument {
+        return BoardDocument(
+            boardId = this.boardId,
+            userId = this.userId,
+            boardTitle = this.boardTitle,
+            boardContents = this.boardContents,
+            boardCreatedAt = this.boardCreatedAt,
+            boardUpdatedAt = this.boardUpdatedAt,
+            boardHashtag = this.boardHashtag,
+            boardCategory = this.boardCategory
+        )
     }
 
 }

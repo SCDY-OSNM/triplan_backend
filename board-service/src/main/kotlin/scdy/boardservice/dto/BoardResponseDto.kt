@@ -1,5 +1,6 @@
 package scdy.boardservice.dto
 
+import scdy.boardservice.elasticsearch.BoardDocument
 import scdy.boardservice.entity.Board
 import scdy.boardservice.enums.BoardCategory
 import java.time.LocalDateTime
@@ -27,5 +28,21 @@ data class BoardResponseDto(
                 boardCategory = board.boardCategory
             )
         }
+
+        fun from(document: BoardDocument): BoardResponseDto {
+            return BoardResponseDto(
+                boardId = document.boardId,
+                userId = document.userId,
+                boardTitle = document.boardTitle,
+                boardContents = document.boardContents,
+                boardCreatedAt = document.boardCreatedAt,
+                boardUpdatedAt = document.boardUpdatedAt,
+                boardHashtag = document.boardHashtag,
+                boardCategory = document.boardCategory
+            )
+        }
+
     }
+
+
 }

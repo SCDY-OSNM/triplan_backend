@@ -141,4 +141,32 @@ class BoardController(private val boardService: BoardService) {
         return ResponseEntity.ok(ApiResponse.success("해시태그로 검색 성공", boardPage))
     }
 
+
+    @GetMapping("/essearch/title")
+    fun EsSearchByTitle(@RequestParam("q", defaultValue = "") title: String,
+                      pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsTitle(title, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("제목으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/essearch/contents")
+    fun EsSearchByContents(@RequestParam("q", defaultValue = "") contents: String,
+                         pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsContents(contents, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("내용으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/essearch/hashtag")
+    fun EsSearchByHashtag(@RequestParam("q", defaultValue = "") hashTag: String,
+                        pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsHashtag(hashTag, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("해시태그로 검색 성공", boardPage))
+    }
+
 }

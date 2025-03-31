@@ -17,11 +17,16 @@ import scdy.boardservice.exception.NotFoundPermissionException
 import scdy.boardservice.exception.UnLikedBoardException
 import scdy.boardservice.repository.BoardLikeRepository
 import scdy.boardservice.repository.BoardRepository
+import scdy.boardservice.repository.EsBoardRepository
 import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
-class BoardService (private val boardRepository: BoardRepository, private val boardLikeRepository: BoardLikeRepository) {
+class BoardService(
+    private val boardRepository: BoardRepository,
+    private val boardLikeRepository: BoardLikeRepository,
+    private val esBoardRepository: EsBoardRepository,
+) {
 
     // create Board
     // 공지는 ADMIN 만 작성 가능
@@ -43,6 +48,7 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
         )
 
         val saved = boardRepository.save(board);
+        esBoardRepository.save(board.toDocument());
 
         return BoardResponseDto.from(saved)
     }
@@ -190,6 +196,28 @@ class BoardService (private val boardRepository: BoardRepository, private val bo
 
         return result.map { BoardResponseDto.from(it) }
     }
+
+    fun searchByEsTitle(title: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result = esBoardRepository.findByBoardTitle(title, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
+
+    fun searchByEsContents(contents: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result = esBoardRepository.findByBoardContents(contents, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
+
+    fun searchByEsHashtag(hashTag: String, pageable: Pageable): Page<BoardResponseDto> {
+
+        val result = esBoardRepository.findByBoardHashtag(hashTag, pageable)
+
+        return result.map { BoardResponseDto.from(it) }
+    }
+
 
     //permission check
     fun isAdmin(userRole: String): Boolean {

@@ -24,6 +24,11 @@ spring:
       host: localhost
       port: 6379
 
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: hyeseong
+
 eureka:
   client:
     service-url:
