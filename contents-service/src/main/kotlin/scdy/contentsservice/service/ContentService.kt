@@ -1,5 +1,8 @@
 package scdy.contentsservice.service
 
+import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import scdy.contentsservice.common.exceptions.NotFoundException
@@ -13,18 +16,22 @@ import scdy.contentsservice.enums.UserRole
 import scdy.contentsservice.exception.AlreadyLikedException
 import scdy.contentsservice.exception.ContentNotFoundException
 import scdy.contentsservice.exception.NotAllowedAuthException
-import scdy.contentsservice.repository.ContentLikeRepository
-import scdy.contentsservice.repository.ContentRepository
+import scdy.contentsservice.repository.elasticSearch.ContentElasticRepository
+import scdy.contentsservice.repository.jpa.ContentLikeRepository
+import scdy.contentsservice.repository.jpa.ContentRepository
 
 @Service
 @Transactional(readOnly = true)
-class ContentService(private var contentRepository: ContentRepository, private var contentLikeRepository: ContentLikeRepository) {
+class ContentService(private val contentRepository: ContentRepository,
+                     private val contentLikeRepository: ContentLikeRepository,
+                     @Lazy private val contentElasticRepository: ContentElasticRepository
+                     ) {
 
     // 콘텐츠 생성
     @Transactional
-    fun createContent(userId: Long, userRole: UserRole, contentRequestDto: ContentRequestDto) :ContentResponseDto{
-        if(userRole != UserRole.HOST && userRole != UserRole.ADMIN){
-           throw NotAllowedAuthException("생성 권한이 없습니다.")
+    fun createContent(userId: Long, userRole: String, contentRequestDto: ContentRequestDto) :ContentResponseDto{
+        if (!"HOST".equals(userRole) && !"ADMIN".equals(userRole)){
+            throw NotAllowedAuthException("생성 권한이 없습니다. (현재 역할: $userRole)")
         }
         val content = Content(
                 userId = userId,
@@ -41,6 +48,7 @@ class ContentService(private var contentRepository: ContentRepository, private v
         )
 
         contentRepository.save(content)
+        contentElasticRepository.save(content.toDocument())
 
         return ContentResponseDto.from(content)
     }
@@ -54,13 +62,15 @@ class ContentService(private var contentRepository: ContentRepository, private v
         return ContentResponseDto.from(content)
     }
 
+
     // 콘텐츠 수정
     @Transactional
     fun updateContent(userId: Long, userRole : UserRole , contentId : Long, contentRequestDto: ContentRequestDto) : ContentResponseDto{
-        val content  = contentRepository.findById(contentId).orElseThrow{
+        val content = contentRepository.findById(contentId).orElseThrow {
             ContentNotFoundException("컨텐츠를 찾을 수 없습니다.")
         }
         val contentUserId = content.userId
+
         if(!checkAuth(userRole, userId, contentUserId)){
             throw NotAllowedAuthException("수정 권한이 없습니다.")
         }
@@ -69,9 +79,29 @@ class ContentService(private var contentRepository: ContentRepository, private v
                 contentName = contentRequestDto.contentName ?: content.contentName,
                 contentType = contentRequestDto.contentType ?: content.contentType,
                 contentExplain = contentRequestDto.contentExplain ?: content.contentExplain,
-                contentAddress =contentRequestDto.contentAddress ?: content.contentAddress,
-                contentAmount = contentRequestDto.contentAmount ?: content.contentAmount)
+                contentAmount = contentRequestDto.contentAmount ?: content.contentAmount,
+                contentPrice = contentRequestDto.contentPrice ?: content.contentPrice)
 
+        return ContentResponseDto.from(content)
+    }
+
+    // 콘텐츠 위치 수정
+    @Transactional
+    fun updateContentLocation(userId : Long, userRole : UserRole, contentId : Long, contentRequestDto: ContentRequestDto) : ContentResponseDto{
+        val content = contentRepository.findById(contentId).orElseThrow {
+            ContentNotFoundException("컨텐츠를 찾을 수 없습니다.")
+        }
+        val contentUserId = content.userId
+
+        if(!checkAuth(userRole, userId, contentUserId)){
+            throw NotAllowedAuthException("수정 권한이 없습니다.")
+        }
+
+        content.updateLocation(
+                contentAddress = contentRequestDto.contentAddress ?: content.contentAddress,
+                contentLatitute = contentRequestDto.contentLatitude ?: content.contentLatitude,
+                contentLongitute = contentRequestDto.contentLongitude ?: content.contentLongitude
+        )
         return ContentResponseDto.from(content)
     }
 
@@ -81,12 +111,12 @@ class ContentService(private var contentRepository: ContentRepository, private v
         val content  = contentRepository.findById(contentId).orElseThrow{
             ContentNotFoundException("컨텐츠를 찾을 수 없습니다.")
         }
-        var contentLike = contentLikeRepository.findByContentAndUserId(content, userId).orElse(null)
+        val contentLike = contentLikeRepository.findByContentAndUserId(content, userId).orElse(null)
         if (contentLike != null) {
             throw AlreadyLikedException("이미 좋아요를 누른 컨텐츠입니다.") // 예외처리
 
         }else{
-            var contentLike = ContentLike(
+            val contentLike = ContentLike(
                     userId = userId,
                     content = content
             )
@@ -102,11 +132,11 @@ class ContentService(private var contentRepository: ContentRepository, private v
         val content  = contentRepository.findById(contentId).orElseThrow{
             ContentNotFoundException("컨텐츠를 찾을 수 없습니다.")
         }
-        var contentLike = contentLikeRepository.findByContentAndUserId(content, userId).orElse(null)
+        val contentLike = contentLikeRepository.findByContentAndUserId(content, userId).orElse(null)
         if(contentLike == null){
             throw NotFoundException("좋아요를 누르지 않은 컨텐츠입니다.")
         }else{
-            contentLikeRepository.deleteById(requireNotNull(contentLike.id) { "Like ID가 null입니다." })
+            contentLikeRepository.deleteById(requireNotNull(contentLike.contentLikeId) { "Like ID가 null입니다." })
             content.contentLikeDown()
         }
         return ContentLikeResponseDto.from(contentLike)
@@ -131,6 +161,7 @@ class ContentService(private var contentRepository: ContentRepository, private v
             throw NotAllowedAuthException("삭제 권한이 없습니다.")
         }
         contentRepository.deleteById(contentId)
+        contentElasticRepository.deleteById(contentId)
 
         return ContentResponseDto.from(content)
     }
@@ -145,8 +176,41 @@ class ContentService(private var contentRepository: ContentRepository, private v
         return contents.map{ContentResponseDto.from(it)} // 코틀린은 map함수에 중괄호
     }
 
+    // Es 컨텐츠 이름 조회
+    fun readContentsByNameEs(contentName : String, pageable: Pageable) : Page<ContentResponseDto> {
+        val contentList = contentElasticRepository.findByContentName(contentName, pageable)
 
+        return contentList.map { ContentResponseDto.from(it) }
+    }
+    // Es 컨텐츠 타입 조회
+    fun readContentsByTypeEs(contentType: ContentType, pageable: Pageable) : Page<ContentResponseDto> {
+        val contentList = contentElasticRepository.findByContentType(contentType, pageable)
+
+        return contentList.map{ ContentResponseDto.from(it) }
+    }
+
+    //ES 컨텐츠 설명 조회
+    fun readingContentsByExplain(contentExplainKeyword : String, pageable: Pageable) : Page<ContentResponseDto>{
+        val contentList = contentElasticRepository.findByContentExplain(contentExplainKeyword, pageable)
+
+        return contentList.map { ContentResponseDto.from(it) }
+    }
+    /*
+    // ES 평점 순 정렬
+    fun readContentOrderByGradeEs(pageable: Pageable) : Page<ContentResponseDto> {
+        val contentList = contentElasticRepository.orderByContentGrade(pageable)
+
+        return contentList.map { ContentResponseDto.from(it) }
+    }
+    // Es 좋아요 순 정렬
+    fun readContentOrderByLikeEs(pageable: Pageable) : Page<ContentResponseDto> {
+        val contentList = contentElasticRepository.orderByContentLike(pageable)
+
+        return contentList.map { ContentResponseDto.from(it) }
+    }
+    */
     fun checkAuth(userRole : UserRole, userId : Long, contentUserId : Long) : Boolean{
+
         return userId == contentUserId || userRole == UserRole.ADMIN
     } // 현재 컨텐츠 등록자가 맞는지 / 관리자인지
 

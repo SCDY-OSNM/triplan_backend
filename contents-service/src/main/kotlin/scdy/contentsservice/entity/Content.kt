@@ -3,6 +3,8 @@ package scdy.contentsservice.entity
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint
+import scdy.contentsservice.document.ContentDocument
 import scdy.contentsservice.enums.ContentType
 
 @Entity
@@ -13,7 +15,7 @@ class Content(
     @Id
     @Column(name= "contentId")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id : Long? = null,
+    val contentId : Long? = null,
 
     @Column(nullable = false)
     var userId : Long,
@@ -46,12 +48,12 @@ class Content(
 
     var contentPrice : Int
     ){
-    fun updateContent(contentName : String, contentType : ContentType, contentExplain: String, contentAddress: String, contentAmount: Int){
+    fun updateContent(contentName : String, contentType : ContentType, contentExplain: String, contentAmount: Int, contentPrice : Int){
         this.contentName = contentName
         this.contentType = contentType
         this.contentExplain =contentExplain
-        this.contentAddress = contentAddress
         this.contentAmount = contentAmount
+        this.contentPrice = contentPrice
     }
 
     fun contentLikeUp(){
@@ -62,26 +64,32 @@ class Content(
         this.contentLike -= 1
     }
 
-    fun updateLocation(contentLatitute : String, contentLongitute : String){
+    fun updateLocation(contentAddress: String, contentLatitute : String, contentLongitute : String){
+        this.contentAddress = contentAddress
         this.contentLatitude = contentLatitute
         this.contentLongitude = contentLongitute
     }
-    companion object{
-        fun of( userId: Long, contentName : String, contentType: ContentType,
-               contentGrade: Int, contentExplain: String, contentAddress: String, contentAmount: Int, contentLike: Int, contentLatitude: String, contentLongitude: String, contentPrice: Int ): Content{
-            return Content(
-                userId = userId,
-                contentName = contentName,
-                contentType = contentType,
-                contentGrade = contentGrade,
-                contentExplain = contentExplain,
-                contentAddress = contentAddress,
-                contentLike = contentLike,
-                contentLatitude = contentLatitude,
-                contentLongitude = contentLongitude,
-                contentAmount = contentAmount,
-                contentPrice = contentPrice,
-            )
-        }
+
+    fun toDocument() : ContentDocument {
+        val lat = this.contentLatitude.toDoubleOrNull()
+        val lon = this.contentLongitude.toDoubleOrNull()
+
+        val geoPoint = if(lat != null && lon != null) GeoPoint(lat, lon) else GeoPoint(0.0,0.0)
+        return ContentDocument(
+                contentId = this.contentId,
+                userId = this.userId,
+                contentName = this.contentName,
+                contentType = this.contentType,
+                contentExplain = this.contentExplain,
+                contentGrade = this.contentGrade,
+                contentAddress = this.contentAddress,
+                contentAmount = this.contentAmount,
+                contentLike = this.contentLike,
+                contentPoint = geoPoint,
+                contentLatitude = this.contentLatitude,
+                contentLongitude = this.contentLongitude,
+                contentPrice = this.contentPrice
+        )
+
     }
 }

@@ -1,0 +1,24 @@
+{
+  "properties" : {
+    "contentName" : {
+      "type" : "text",
+      "analyzer" : "standard"
+    },
+    "contentType" : {
+      "type" : "keyword"
+    },
+    "contentExplain" : {
+      "type" : "text",
+      "analyzer" : "standard"
+    },
+    "contentGrade" : {
+      "type" : "integer"
+    },
+    "contentLike" : {
+      "type" : "integer"
+    },
+    "contentPoint" : {
+      "type" : "geo_point"
+    }
+  }
+}

@@ -97,7 +97,7 @@ jwt:
     key: ${JWT_KEY}
 
 server:
-  port: 38080
+  port: 8080
 
 eureka:
   client:

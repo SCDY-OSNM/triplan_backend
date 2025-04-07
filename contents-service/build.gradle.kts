@@ -59,7 +59,8 @@ dependencies {
     //로깅
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
-
+    // Elasticsearch
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
 }
 
 

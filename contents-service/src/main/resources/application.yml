@@ -23,6 +23,10 @@ spring:
     redis:
       host: localhost
       port: 6379
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: yearm404
 
 eureka:
   client:

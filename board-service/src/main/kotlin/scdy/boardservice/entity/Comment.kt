@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 class Comment(
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var commentId : Long? = null,

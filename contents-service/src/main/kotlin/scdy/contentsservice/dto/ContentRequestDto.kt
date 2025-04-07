@@ -1,26 +1,25 @@
 package scdy.contentsservice.dto
 
-import scdy.contentsservice.entity.Content
 import scdy.contentsservice.enums.ContentType
 
 
 class ContentRequestDto(
 
-        var userId : Long,
+        val userId : Long,
 
-        var contentName : String,
+        val contentName : String,
 
-        var contentType : ContentType,
+        val contentType : ContentType,
 
-        var contentExplain : String,
+        val contentExplain : String,
 
-        var contentAddress : String,
+        val contentAddress : String,
 
-        var contentAmount : Int,
+        val contentAmount : Int,
 
-        var contentLatitude : String,
+        val contentLatitude : String,
 
-        var contentLongitude : String,
+        val contentLongitude : String,
 
-        var contentPrice : Int
+        val contentPrice : Int
 )

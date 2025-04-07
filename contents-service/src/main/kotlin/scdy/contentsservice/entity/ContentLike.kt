@@ -12,13 +12,13 @@ class ContentLike(
         @Id
         @Column(name = "contentLikeId")
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id : Long? = null,
+        val contentLikeId : Long? = null,
 
         @Column(nullable = false)
         var userId : Long,
 
-        @JoinColumn(name = "content")
-        @ManyToOne
+        @JoinColumn(name = "content_id")
+        @ManyToOne(fetch = FetchType.LAZY)
         var content : Content
 ) {
 

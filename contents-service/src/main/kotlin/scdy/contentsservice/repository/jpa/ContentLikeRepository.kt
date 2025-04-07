@@ -1,10 +1,8 @@
-package scdy.contentsservice.repository
+package scdy.contentsservice.repository.jpa
 
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
 import scdy.contentsservice.entity.Content
 import scdy.contentsservice.entity.ContentLike
-import scdy.contentsservice.exception.ContentLikeNotFoundException
 import java.util.*
 
 interface ContentLikeRepository :JpaRepository<ContentLike, Long> {
@@ -14,7 +12,7 @@ interface ContentLikeRepository :JpaRepository<ContentLike, Long> {
 
     fun findByContentAndUserId(content: Content, userId: Long) : Optional<ContentLike>
 
-    fun findByContentId(contentId : Long) : List<ContentLike>
+    fun findByContent(content : Content) : List<ContentLike>
 
     fun findByUserId(userId : Long): List<ContentLike>
 }

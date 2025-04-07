@@ -1,6 +1,8 @@
 package scdy.contentsservice.dto
 
+import org.apache.commons.configuration.PropertyConverter.toLong
 import scdy.contentsservice.entity.Content
+import scdy.contentsservice.document.ContentDocument
 import scdy.contentsservice.enums.ContentType
 
 data class ContentResponseDto(
@@ -31,7 +33,7 @@ data class ContentResponseDto(
     companion object {
         fun from(content: Content): ContentResponseDto {
             return ContentResponseDto(
-                    contentId = content.id,
+                    contentId = content.contentId,
                     userId = content.userId,
                     contentName = content.contentName,
                     contentType = content.contentType,
@@ -43,6 +45,22 @@ data class ContentResponseDto(
                     contentLongitude = content.contentLongitude,
                     contentLike = content.contentLike,
                     contentPrice = content.contentPrice
+            )
+        }
+        fun from(contentDocument: ContentDocument): ContentResponseDto{
+            return  ContentResponseDto(
+                    contentId = toLong(contentDocument.contentId),
+                    userId = contentDocument.userId,
+                    contentName = contentDocument.contentName,
+                    contentType = contentDocument.contentType,
+                    contentExplain = contentDocument.contentExplain,
+                    contentGrade = contentDocument.contentGrade,
+                    contentAddress = contentDocument.contentAddress,
+                    contentAmount = contentDocument.contentAmount,
+                    contentLatitude = contentDocument.contentLatitude,
+                    contentLongitude = contentDocument.contentLongitude,
+                    contentLike = contentDocument.contentLike,
+                    contentPrice = contentDocument.contentPrice
             )
         }
     }
