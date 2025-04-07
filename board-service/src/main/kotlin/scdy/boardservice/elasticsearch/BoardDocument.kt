@@ -15,8 +15,10 @@ data class BoardDocument(
 
     var userId: Long,
 
+    @Field(type = FieldType.Text, analyzer = "nori")
     var boardTitle: String,
 
+    @Field(type = FieldType.Text, analyzer = "nori")
     var boardContents: String,
 
     @Field(type = FieldType.Date, format = [DateFormat.date_hour_minute_second_millis, DateFormat.epoch_millis])
@@ -25,6 +27,7 @@ data class BoardDocument(
     @Field(type = FieldType.Date, format = [DateFormat.date_hour_minute_second_millis, DateFormat.epoch_millis])
     var boardUpdatedAt: LocalDateTime,
 
+    @Field(type = FieldType.Text, analyzer = "nori")
     var boardHashtag: String?,
 
     @Field(type = FieldType.Keyword)

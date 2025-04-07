@@ -8,10 +8,10 @@ import scdy.boardservice.entity.Board
 
 interface EsBoardRepository: ElasticsearchRepository<BoardDocument, Long> {
 
-    fun findByBoardTitle(title: String, pageable: Pageable): Page<Board>
+    fun findByBoardTitle(title: String, pageable: Pageable): Page<BoardDocument>
 
-    fun findByBoardContents(contents: String, pageable: Pageable): Page<Board>
+    fun findByBoardContents(contents: String, pageable: Pageable): Page<BoardDocument>
 
-    fun findByBoardHashtag(hashtag: String, pageable: Pageable): Page<Board>
+    fun findByBoardHashtag(hashtag: String, pageable: Pageable): Page<BoardDocument>
 
 }
