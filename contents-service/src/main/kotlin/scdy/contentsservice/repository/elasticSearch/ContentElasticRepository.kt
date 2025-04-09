@@ -3,6 +3,7 @@ package scdy.contentsservice.repository.elasticSearch
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
+import org.springframework.data.jpa.repository.Query
 import scdy.contentsservice.document.ContentDocument
 import scdy.contentsservice.enums.ContentType
 
@@ -13,6 +14,11 @@ interface ContentElasticRepository : ElasticsearchRepository<ContentDocument, Lo
     fun findByContentType(contentType: ContentType, pageable :Pageable) : Page<ContentDocument>
 
     fun findByContentExplain(contentExplain : String, pageable: Pageable) : Page<ContentDocument>
+
+    /*
+    @Query()
+    fun findAllOrderByDistance(lat : Double, lon : Double, pageable: Pageable): Page<ContentDocument>
+    */
 
     //fun orderByContentGrade(pageable: Pageable) : Page<ContentDocument> // 평점순 정렬
 

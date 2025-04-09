@@ -75,6 +75,7 @@ class Content(
         val lon = this.contentLongitude.toDoubleOrNull()
 
         val geoPoint = if(lat != null && lon != null) GeoPoint(lat, lon) else GeoPoint(0.0,0.0)
+
         return ContentDocument(
                 contentId = this.contentId,
                 userId = this.userId,

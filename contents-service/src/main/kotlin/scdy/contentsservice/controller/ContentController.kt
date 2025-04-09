@@ -10,11 +10,13 @@ import scdy.contentsservice.dto.ContentResponseDto
 import scdy.contentsservice.dto.ContentLikeResponseDto
 import scdy.contentsservice.enums.ContentType
 import scdy.contentsservice.enums.UserRole
+import scdy.contentsservice.service.ContentSearchService
 import scdy.contentsservice.service.ContentService
 
 @RestController
 @RequestMapping("/api/v1/contents")
-class ContentController(private val contentService: ContentService) {
+class ContentController(private val contentService: ContentService,
+                        private val contentSearchService: ContentSearchService) {
 
     // 콘텐츠 생성
     @PostMapping
@@ -72,7 +74,6 @@ class ContentController(private val contentService: ContentService) {
         val likedContents = contentService.readLikedContentByUser(userId)
         return ResponseEntity.ok(ApiResponse.success("좋아요한 콘텐츠 조회 성공", likedContents))
     }
-    /*
     // 타입별 콘텐츠 조회
     @GetMapping("/type")
     fun getContentsByType(@RequestParam contentType: ContentType): ResponseEntity<ApiResponse<List<ContentResponseDto>>> {
@@ -80,21 +81,6 @@ class ContentController(private val contentService: ContentService) {
         return ResponseEntity.ok(ApiResponse.success("타입별 콘텐츠 조회 성공", contents))
     }
 
-    // Es 컨텐츠 생성
-    @PostMapping("/es")
-    fun createEsContent(@RequestHeader("X-Authenticated-User") userId: Long, @RequestHeader ("X-User-Role") userRole: String, @RequestBody contentRequestDto: ContentRequestDto
-    ): ResponseEntity<ApiResponse<ContentResponseDto>> {
-        val contentResponseDto = contentService.createContentEs(userId, userRole, contentRequestDto)
-        return ResponseEntity.ok(ApiResponse.success("ES 콘텐츠 생성 성공", contentResponseDto))
-    }
-
-    // ES 컨텐츠 단일 조회
-    @GetMapping("/es/{contentId}")
-    fun getEsContentById(@PathVariable("contentId") contentId : Long) : ResponseEntity<ApiResponse<ContentResponseDto>> {
-        val contentResponseDto = contentService.readContentEs(contentId)
-        return ResponseEntity.ok(ApiResponse.success("ES 컨텐츠 조회 완료", contentResponseDto))
-    }
-    */
     // ES 컨텐츠 이름 조회
     @GetMapping("/es/name-search")
     fun getEsContentByName(@RequestParam("contentName") contentName : String, pageable: Pageable): ResponseEntity<ApiResponse<Page<ContentResponseDto>>>{
@@ -114,6 +100,21 @@ class ContentController(private val contentService: ContentService) {
     fun getEsContentsByExplain(@RequestParam("contentExplainKeyword") contentExplainKeyword : String, pageable: Pageable) : ResponseEntity<ApiResponse<Page<ContentResponseDto>>> {
         val contentList = contentService.readingContentsByExplain(contentExplainKeyword, pageable)
         return ResponseEntity.ok(ApiResponse.success("Es 컨텐츠 설명으로 조회 완료", contentList))
+    }
+
+    // 발전된 ES 조회
+    @GetMapping("/es/overall-search")
+    fun autoComplete(@RequestParam("query") query :String, pageable: Pageable) : ResponseEntity<ApiResponse<Page<ContentResponseDto>>>{
+        val contentList =  contentSearchService.autocomplete(query, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("Es 제목, 설명 조회 완료", contentList))
+    }
+
+    @GetMapping("/es/geo-search")
+    fun getNearbyContents(@RequestParam lat: Double, @RequestParam lon: Double, @RequestParam(required = false, defaultValue = "10km") distance: String, pageable: Pageable): ResponseEntity<ApiResponse<Page<ContentResponseDto>>> {
+        val contentList = contentService.getNearbyContents(lat, lon, distance, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("Es 위치 기반 주변 조회 완료", contentList))
     }
 
 }

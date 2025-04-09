@@ -24,7 +24,11 @@
       },
       "nori_part_of_speech": {
         "type": "nori_part_of_speech",
-        "stoptags": ["E", "IC", "J", "MAG", "MAJ", "MM", "SP", "SSC", "SSO", "SC", "SE", "XSA", "UNA", "VSV"]
+        "stoptags": [ "E", "EC", "EP", "EF",
+          "VV", "VA", "VX", "VCP", "VCN",
+          "XSA", "XSN", "XSV",
+          "J", "IC", "MM", "MAG", "MAJ",
+          "SP", "SSC", "SSO", "SC", "SE", "UNA", "VSV"]
       }
     }
   }

@@ -24,7 +24,8 @@ import scdy.contentsservice.repository.jpa.ContentRepository
 @Transactional(readOnly = true)
 class ContentService(private val contentRepository: ContentRepository,
                      private val contentLikeRepository: ContentLikeRepository,
-                     @Lazy private val contentElasticRepository: ContentElasticRepository
+                     @Lazy private val contentElasticRepository: ContentElasticRepository,
+                     private val contentSearchService: ContentSearchService
                      ) {
 
     // 콘텐츠 생성
@@ -49,6 +50,7 @@ class ContentService(private val contentRepository: ContentRepository,
 
         contentRepository.save(content)
         contentElasticRepository.save(content.toDocument())
+        contentSearchService.saveContentIndex(content)
 
         return ContentResponseDto.from(content)
     }
@@ -81,6 +83,17 @@ class ContentService(private val contentRepository: ContentRepository,
                 contentExplain = contentRequestDto.contentExplain ?: content.contentExplain,
                 contentAmount = contentRequestDto.contentAmount ?: content.contentAmount,
                 contentPrice = contentRequestDto.contentPrice ?: content.contentPrice)
+
+        val updatedFields = mutableMapOf<String, Any>()
+        contentRequestDto.contentName.let { updatedFields["contentName"] = it }
+        contentRequestDto.contentType.let { updatedFields["contentType"] = it }
+        contentRequestDto.contentExplain.let { updatedFields["contentExplain"] = it }
+        contentRequestDto.contentAmount.let { updatedFields["contentAmount"] = it }
+        contentRequestDto.contentPrice.let { updatedFields["contentPrice"] = it }
+
+        if (updatedFields.isNotEmpty()) {
+            contentSearchService.updateIndex(contentId, updatedFields)
+        }
 
         return ContentResponseDto.from(content)
     }
@@ -162,6 +175,7 @@ class ContentService(private val contentRepository: ContentRepository,
         }
         contentRepository.deleteById(contentId)
         contentElasticRepository.deleteById(contentId)
+        contentSearchService.deleteContentIndex(contentId)
 
         return ContentResponseDto.from(content)
     }
@@ -195,20 +209,12 @@ class ContentService(private val contentRepository: ContentRepository,
 
         return contentList.map { ContentResponseDto.from(it) }
     }
-    /*
-    // ES 평점 순 정렬
-    fun readContentOrderByGradeEs(pageable: Pageable) : Page<ContentResponseDto> {
-        val contentList = contentElasticRepository.orderByContentGrade(pageable)
 
-        return contentList.map { ContentResponseDto.from(it) }
+    // ES 주변 컨텐츠 조회
+    fun getNearbyContents(lat: Double, lon: Double, distance: String = "10km", pageable: Pageable): Page<ContentResponseDto> {
+        return contentSearchService.findNearByContents(lat, lon, distance, pageable)
     }
-    // Es 좋아요 순 정렬
-    fun readContentOrderByLikeEs(pageable: Pageable) : Page<ContentResponseDto> {
-        val contentList = contentElasticRepository.orderByContentLike(pageable)
 
-        return contentList.map { ContentResponseDto.from(it) }
-    }
-    */
     fun checkAuth(userRole : UserRole, userId : Long, contentUserId : Long) : Boolean{
 
         return userId == contentUserId || userRole == UserRole.ADMIN

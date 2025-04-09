@@ -5,21 +5,21 @@ import scdy.contentsservice.enums.ContentType
 
 class ContentRequestDto(
 
-        val userId : Long,
+        val userId : Long =0,
 
-        val contentName : String,
+        val contentName : String ="",
 
-        val contentType : ContentType,
+        val contentType : ContentType = ContentType.FREE,
 
-        val contentExplain : String,
+        val contentExplain : String="",
 
-        val contentAddress : String,
+        val contentAddress : String="",
 
-        val contentAmount : Int,
+        val contentAmount : Int =0,
 
-        val contentLatitude : String,
+        val contentLatitude : String="",
 
-        val contentLongitude : String,
+        val contentLongitude : String="",
 
-        val contentPrice : Int
+        val contentPrice : Int =0
 )

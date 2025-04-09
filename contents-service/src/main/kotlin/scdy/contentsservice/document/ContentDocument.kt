@@ -1,48 +1,58 @@
 package scdy.contentsservice.document
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.*
 import org.springframework.data.elasticsearch.core.geo.GeoPoint
 import scdy.contentsservice.enums.ContentType
 
 @Document(indexName = "content")
-@Mapping(mappingPath = "resources/elastic-setting.json")
-@Setting(settingPath = "elastic-setting.json") // 여기 노리 세팅 들어가야됨.
-class ContentDocument(
-
+@Mapping(mappingPath = "/elastic-mapping.json")
+@Setting(settingPath = "/elastic-setting.json") // 여기 노리 세팅 들어가야됨.
+@JsonIgnoreProperties(ignoreUnknown = true)
+class ContentDocument @JsonCreator constructor(
         @Id
-        val contentId : Long? = null,
+        @JsonProperty("contentId")
+        val contentId: Long? = null,
 
-        @Field(name = "userId", type = FieldType.Long)
-        var userId : Long,
+        @JsonProperty("userId")
+        var userId: Long,
 
-        @Field(name = "contentName" , type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_search_analyzer")
-        var contentName : String,
+        @JsonProperty("contentName")
+        var contentName: String,
 
-        @Field(name = "contentType", type = FieldType.Keyword)
-        var contentType : ContentType,
+        @JsonProperty("contentType")
+        var contentType: ContentType,
 
-        @Field(name = "contentExplain", type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_search_analyzer")
-        var contentExplain : String,
+        @JsonProperty("contentExplain")
+        var contentExplain: String,
 
-        @Field(name = "contentGrade", type = FieldType.Integer)
-        var contentGrade : Int,
+        @JsonProperty("contentGrade")
+        var contentGrade: Int,
 
-        var contentAddress : String,
+        @JsonProperty("contentAddress")
+        var contentAddress: String,
 
-        var contentAmount : Int,
+        @JsonProperty("contentAmount")
+        var contentAmount: Int,
 
-        @Field(name = "contentLike", type = FieldType.Integer)
-        var contentLike : Int,
+        @JsonProperty("contentLike")
+        var contentLike: Int,
 
+        @JsonProperty("contentPoint")
         @GeoPointField
-        var contentPoint : GeoPoint,
+        var contentPoint: GeoPoint,
 
-        var contentLatitude : String,
+        @JsonProperty("contentLatitude")
+        var contentLatitude: String,
 
-        var contentLongitude : String,
+        @JsonProperty("contentLongitude")
+        var contentLongitude: String,
 
-        var contentPrice : Int
+        @JsonProperty("contentPrice")
+        var contentPrice: Int
 ){
 
 }
