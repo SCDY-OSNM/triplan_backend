@@ -9,28 +9,32 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-public class NotificationDto {
+public class NotificationMessage {
+
+    private String noticeTitle;
+
+    private String noticeBody;
 
     private Long userId;
-
-    private String noticeContents;
 
     private LocalDateTime noticedAt; // 알림 일시
 
     private Boolean isChecked;
 
     @Builder
-    public NotificationDto(Long userId, String noticeContents, LocalDateTime noticedAt, Boolean isChecked) {
+    public NotificationMessage(String noticeTitle, String noticeBody, Long userId, LocalDateTime noticedAt, Boolean isChecked) {
+        this.noticeTitle = noticeTitle;
+        this.noticeBody = noticeBody;
         this.userId = userId;
-        this.noticeContents = noticeContents;
         this.noticedAt = noticedAt;
         this.isChecked = isChecked;
     }
 
-    public static NotificationDto from(Notification notification){
-        return NotificationDto.builder()
+    public static NotificationMessage from(Notification notification){
+        return NotificationMessage.builder()
+                .noticeTitle(notification.getNoticeTitle())
+                .noticeBody(notification.getNoticeBody())
                 .userId(notification.getUserId())
-                .noticeContents(notification.getNoticeContents())
                 .noticedAt(notification.getNoticedAt())
                 .isChecked(notification.getIsChecked())
                 .build();

@@ -10,9 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class ReservationRequestDto {
-    private Long reservationId;
 
     private Long userId;
 
@@ -27,8 +25,9 @@ public class ReservationRequestDto {
     private ReservationStatus reservationStatus;
 
     @Builder
-    public ReservationRequestDto(Long contentsId, Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt,
+    public ReservationRequestDto(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt, LocalDateTime reservationEndAt,
                                  ReservationStatus reservationStatus) {
+        this.userId = userId;
         this.contentsId = contentsId;
         this.planDetailId = planDetailId;
         this.reservationStartAt = reservationStartAt;

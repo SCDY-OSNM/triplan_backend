@@ -26,8 +26,9 @@ public class ReservationResponseDto {
     private ReservationStatus reservationStatus;
 
     @Builder
-    public ReservationResponseDto(Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt,
+    public ReservationResponseDto(Long reservationId, Long userId, Long contentsId, Long planDetailId, LocalDateTime reservationStartAt,
                                   LocalDateTime reservationEndAt, ReservationStatus reservationStatus) {
+        this.reservationId = reservationId;
         this.userId = userId;
         this.contentsId = contentsId;
         this.planDetailId = planDetailId;
@@ -38,6 +39,7 @@ public class ReservationResponseDto {
 
     public static ReservationResponseDto from(Reservation reservation) {
         return ReservationResponseDto.builder()
+                .reservationId(reservation.getReservationId())
                 .userId(reservation.getUserId())
                 .contentsId(reservation.getContentsId())
                 .planDetailId(reservation.getPlanDetailId())

@@ -52,9 +52,6 @@ dependencies {
     // firabase
     implementation 'com.google.firebase:firebase-admin:8.1.0'
 
-    // rabbitMQ 의존성 추가
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-
 }
 
 tasks.named('test') {

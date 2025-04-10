@@ -20,13 +20,13 @@ public class Notification {
     private Long notificationId;
 
     @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
     private String noticeTitle;
 
     @Column(nullable = false)
-    private String noticeContents;
+    private String noticeBody;
+
+    @Column(nullable = false)
+    private Long userId;
 
     @Column(nullable = false)
     private LocalDateTime noticedAt;
@@ -35,10 +35,10 @@ public class Notification {
     private Boolean isChecked;
 
     @Builder
-    public Notification(Long userId, String noticeTitle, String noticeContents, LocalDateTime noticedAt, Boolean isChecked){
-        this.userId = userId;
+    public Notification(String noticeTitle, String noticeBody, Long userId, LocalDateTime noticedAt, Boolean isChecked){
         this.noticeTitle = noticeTitle;
-        this.noticeContents = noticeContents;
+        this.noticeBody = noticeBody;
+        this.userId = userId;
         this.noticedAt = noticedAt;
         this.isChecked = isChecked;
     }

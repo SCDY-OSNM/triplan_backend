@@ -1,12 +1,22 @@
 package scdy.reservationservice.common.advice;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
 public class ApiResponse<T>{
+
+    @JsonProperty("status")
     private String status;
+
+    @JsonProperty("message")
     private String message;
+
+    @JsonProperty("data")
     private T data;
+
+    public ApiResponse() {
+    }
 
     public ApiResponse(String message, T data) {
         this.status = "success"; // 고정된 성공 상태

@@ -8,6 +8,7 @@ import scdy.notificationservice.dto.UserResponseDto;
 
 @FeignClient(name = "user-service")
 public interface UserClient {
-    @GetMapping
+
+    @GetMapping("/api/v1/users/{userId}")
     ApiResponse<UserResponseDto> getUserById(@PathVariable("userId") Long userId);
 }

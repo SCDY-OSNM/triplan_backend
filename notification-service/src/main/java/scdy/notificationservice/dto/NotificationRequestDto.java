@@ -13,31 +13,11 @@ public class NotificationRequestDto {
 
     private Long userId;
 
-    private String noticeTitle;
-
-    private String noticeContents;
-
-    private LocalDateTime noticedAt; // 알림 일시
-
-    private Boolean isChecked;
+    private NotificationMessage notificationMessage;
 
     @Builder
-    public NotificationRequestDto(Long userId, String noticeTitle, String noticeContents, LocalDateTime noticedAt, Boolean isChecked) {
+    public NotificationRequestDto(Long userId, NotificationMessage notificationMessage) {
         this.userId = userId;
-        this.noticeTitle = noticeTitle;
-        this.noticeContents = noticeContents;
-        this.noticedAt = noticedAt;
-        this.isChecked = isChecked;
+        this.notificationMessage = notificationMessage;
     }
-
-    public static NotificationRequestDto from(Notification notification){
-        return NotificationRequestDto.builder()
-                .userId(notification.getUserId())
-                .noticeTitle(notification.getNoticeTitle())
-                .noticeContents(notification.getNoticeContents())
-                .noticedAt(notification.getNoticedAt())
-                .isChecked(notification.getIsChecked())
-                .build();
-    }
-
 }

@@ -43,7 +43,7 @@ public class FcmToken {
 
         @Builder
         public FcmToken(Long fcmTokenId, String fcmToken, Long userId, String deviceInfo, LocalDateTime createdAt, boolean isActive) {
-                fcmTokenId = fcmTokenId;
+                this.fcmTokenId = fcmTokenId;
                 this.fcmToken = fcmToken;
                 this.userId = userId;
                 this.deviceInfo = deviceInfo;

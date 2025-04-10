@@ -50,7 +50,7 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     @Override
     public Reservation findByIdOrElseThrow(Long id) {
         Reservation result = queryFactory
-                .select(reservation)
+                .selectFrom(reservation)
                 .where(reservation.reservationId.eq(id))
                 .fetchFirst();
 
