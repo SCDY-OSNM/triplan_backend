@@ -13,7 +13,11 @@ data class BoardResponseDto(
     val boardCreatedAt : LocalDateTime,
     val boardUpdatedAt : LocalDateTime,
     val boardHashtag : String?,
-    val boardCategory : BoardCategory
+    val boardCategory : BoardCategory,
+    // (선택) 게시글 자체의 좋아요 수 필드가 있다면 포함
+    val contentLike: Int? = null,
+    // (선택) 최근 좋아요 수를 포함하고 싶다면 추가
+    val recentLikeCount: Long? = null
 ){
     companion object {
         fun from(board: Board): BoardResponseDto {

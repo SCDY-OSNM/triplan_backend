@@ -73,6 +73,14 @@ dependencies {
 
     // Elasticsearch 의존성
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.12")
+    implementation("co.elastic.clients:elasticsearch-java:8.17.3")
+
+
+
 }
 
 

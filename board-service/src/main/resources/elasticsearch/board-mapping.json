@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "boardId": {
+      "type": "long"
+    },
+    "userId": {
+      "type": "long"
+    },
+    "boardTitle": {
+      "type": "text",
+      "analyzer": "nori",
+      "search_analyzer": "nori"
+    },
+    "boardContents": {
+      "type": "text",
+      "analyzer": "nori",
+      "search_analyzer": "nori"
+    },
+    "boardCreatedAt": {
+      "type": "date",
+      "format": "strict_date_time||date_hour_minute_second_millis||epoch_millis"
+    },
+    "boardUpdatedAt": {
+      "type": "date",
+      "format": "strict_date_time||date_hour_minute_second_millis||epoch_millis"
+    },
+    "boardHashtag": {
+      "type": "text",
+      "analyzer": "nori",
+      "search_analyzer": "nori"
+    },
+    "boardCategory": {
+      "type": "keyword"
+    }
+  }
+}

@@ -2,12 +2,15 @@ package scdy.boardservice.service
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import scdy.boardservice.dto.BoardLikeResponseDto
 import scdy.boardservice.dto.BoardRequestDto
 import scdy.boardservice.dto.BoardResponseDto
 import scdy.boardservice.dto.BoardUpdateRequestDto
+import scdy.boardservice.elasticsearch.BoardDocument
 import scdy.boardservice.entity.Board
 import scdy.boardservice.entity.BoardLike
 import scdy.boardservice.enums.BoardCategory
@@ -24,8 +27,10 @@ import java.time.LocalDateTime
 @Transactional(readOnly = true)
 class BoardService(
     private val boardRepository: BoardRepository,
-    private val boardLikeRepository: BoardLikeRepository,
     private val esBoardRepository: EsBoardRepository,
+//    private val elasticsearchOperations: ElasticsearchOperations,
+    private val searchService: SearchService,
+    private val boardLikeRepository: BoardLikeRepository,
 ) {
 
     // create Board
@@ -48,7 +53,15 @@ class BoardService(
         )
 
         val saved = boardRepository.save(board);
-        esBoardRepository.save(board.toDocument());
+//        esBoardRepository.save(board.toDocument());
+
+//        val savedDoc = board.toDocument()
+//        elasticsearchOperations.save(savedDoc, IndexCoordinates.of("board_index"))
+//        elasticsearchOperations.indexOps(BoardDocument::class.java).refresh()
+        val likeCount = boardLikeRepository.countByBoard_BoardId(board.boardId ?: -1)
+
+        searchService.saveBoardIndex(board)
+
 
         return BoardResponseDto.from(saved)
     }
@@ -98,6 +111,8 @@ class BoardService(
             boardHashtag = boardUpdateRequestDto.boardHashtag,
         )
 
+        searchService.updateBoardIndex(board)
+
         return BoardResponseDto.from(board)
     }
 
@@ -116,62 +131,13 @@ class BoardService(
         }
 
         boardRepository.delete(board)
+        searchService.deleteBoardIndex(boardId)
 
         return true
     }
 
 
-    //Board Like (create BoardLike)
-    @Transactional
-    fun likeBoard(boardId: Long, userId: Long): BoardLikeResponseDto {
 
-        //게시물 확인
-        val board = boardRepository.findById(boardId).orElseThrow {
-            throw BoardNotFoundException("존재하지 않는 게시물입니다.")
-        }
-
-        //사용자 확인(이미 좋아요가 있는지)
-        if( boardLikeRepository.findByUserIdAndId(userId, boardId).isPresent){
-            throw AleadyLikedBoardException("이미 좋아요 한 게시물입니다.")
-        }
-
-        val boardLike = BoardLike(
-            userId = userId,
-            board = board
-        )
-
-        boardLikeRepository.save(boardLike)
-        return BoardLikeResponseDto.from(boardLike)
-    }
-
-    //TODO: Soft delete 구현
-    //Cancel Board Like (delete boardLike)
-    @Transactional
-    fun cancelLikeBoard(boardId: Long, userId: Long): Boolean {
-
-        boardRepository.findById(boardId).orElseThrow {
-            throw BoardNotFoundException("존재하지 않는 게시물입니다.")
-        }
-
-        //사용자 확인(좋아요를 누르지 않은경우)
-        val boardLike: BoardLike = boardLikeRepository.findByUserIdAndId(userId, boardId).orElse(null)
-            ?: throw UnLikedBoardException("좋아요 하지 않은 게시물입니다.")
-
-        boardLikeRepository.delete(boardLike)
-
-        return true
-    }
-
-    //get Num of BoardLikes
-    //TODO: 조회 마다 새로운 쿼리를 날리는게 비효율적. 대안 찾기
-    fun getNumOfBoardLikes(boardId: Long): Int {
-
-        boardRepository.findById(boardId).orElseThrow {
-            throw BoardNotFoundException("존재하지 않는 게시물입니다.")
-        }
-
-        return boardLikeRepository.findNumberByBoardId(boardId)
-    }
 
     //search by title
     fun searchByTitle(title: String, pageable: Pageable): Page<BoardResponseDto> {
