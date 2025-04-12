@@ -21,6 +21,7 @@ import scdy.planservice.repository.PlanRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class PlanService {
     private final PlanPlaceRepository planPlaceRepository;
     private final PlanDetailRepository planDetailRepository;
     private final MemberRepository memberRepository;
+    private final ChatService chatService;
 
     private final MemberService memberService;
 
@@ -48,8 +50,21 @@ public class PlanService {
                 .planPlace(planRequestDto.getPlanPlace())
                 .build();
         planRepository.save(plan);
-
+        // 현재 유저로 리더 생성
         memberService.createLeader(userId, plan.getPlanId());
+        // 해당 플랜의 채팅 생성
+
+        String roomId = UUID.randomUUID().toString();
+
+        ChatRoomDto chatRoomDto = ChatRoomDto.builder()
+                .roomId(roomId)
+                .planId(plan.getPlanId())
+                .planTitle(plan.getPlanTitle())
+                .memberCount(1)
+                .members(List.of(userId))
+                .build();
+
+        chatService.createRoom(chatRoomDto);
 
         return PlanResponseDto.from(plan);
     }
@@ -171,6 +186,11 @@ public class PlanService {
     }
 
     // 일정 공유
+
+    // 플랜 채팅방 단일 조회
+    public ChatRoomDto getChatRoomById(String roomId){
+        return chatService.getRoom(roomId);
+    }
 
     private boolean checkAuth(Long userId, Long planId){
         Plan plan = planRepository.findByIdOrElseThrow(planId);

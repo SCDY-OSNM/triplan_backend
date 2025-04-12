@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import scdy.planservice.dto.MemberRequestDto;
 import scdy.planservice.dto.MemberResponseDto;
 import scdy.planservice.entity.Member;
+import scdy.planservice.entity.Plan;
 import scdy.planservice.enums.MemberRole;
 import scdy.planservice.exception.MemberNotFoundException;
 import scdy.planservice.exception.NotAllowedAuthException;
@@ -20,6 +21,7 @@ import java.util.List;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PlanRepository planRepository;
+    private final ChatService chatService;
 
     // 리더 생성 (플랜을 처음 생성했을 때)
     @Transactional
@@ -50,6 +52,10 @@ public class MemberService {
                 .memberRole(MemberRole.MEMBER) // 멤버가 없을 경우 자동으로 리더, 리더 있으면 자동으로 멤버
                 .build();
         memberRepository.save(member);
+
+        // 채팅방 자동 참가
+        String roomId = chatService.findRoomIdByPlanId(member.getPlanId());
+        chatService.addMember(roomId, member.getUserId());
 
         return MemberResponseDto.from(member);
     }
