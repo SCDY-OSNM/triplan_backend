@@ -80,6 +80,9 @@ dependencies {
     implementation("co.elastic.clients:elasticsearch-java:8.17.3")
 
 
+    //S3 의존성
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+
 
 }
 
