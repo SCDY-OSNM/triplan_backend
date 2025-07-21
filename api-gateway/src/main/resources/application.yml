@@ -83,12 +83,18 @@ spring:
           filters:
             - RewritePath=/api/v1/notifications/(?<segment>.*), /api/v1/notifications/${segment}
 
-        - id: config-service
+        - id: config-service-carts
           uri: lb://config-service
           predicates:
-            - Path=/api/v1/carts/**, Path=/api/v1/images/**
+            - Path=/api/v1/carts/**
           filters:
             - RewritePath=/api/v1/carts/(?<segment>.*), /api/v1/carts/${segment}
+
+        - id: config-service-images
+          uri: lb://config-service
+          predicates:
+            - Path=/api/v1/images/**
+          filters:
             - RewritePath=/api/v1/images/(?<segment>.*), /api/v1/images/${segment}
 
 

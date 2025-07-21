@@ -1,6 +1,7 @@
 package scdy.configservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import scdy.configservice.enums.ImageType;
@@ -27,4 +28,21 @@ public class Image {
 
     @Column(nullable = false)
     private int imageSize;
+
+    @Builder
+    public Image(ImageType imageType,
+                 Long userId,
+                 Long boardId,
+                 Long contentsId,
+                 String imageUrl,
+                 int imageSize) {
+        this.imageType = imageType;
+        this.userId = userId;
+        this.boardId = boardId;
+        this.contentsId = contentsId;
+        this.imageUrl = imageUrl;
+        this.imageSize = imageSize;
+    }
+
+
 }

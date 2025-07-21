@@ -1,9 +1,14 @@
 server:
-  port: 8090
+  port: 38090
 
 spring:
   application:
     name: config-service
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,8 +26,8 @@ spring:
         format_sql: false
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 eureka:
   client:
