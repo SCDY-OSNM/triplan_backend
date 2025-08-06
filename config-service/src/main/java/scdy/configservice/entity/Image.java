@@ -15,6 +15,7 @@ public class Image {
     private Long imageId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ImageType imageType;
 
     private Long boardId;

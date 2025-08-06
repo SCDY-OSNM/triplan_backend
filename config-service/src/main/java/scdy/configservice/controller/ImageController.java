@@ -23,7 +23,7 @@ public class ImageController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestPart("imageRequestDto") ImageRequestDto imageRequestDto
     ) {
-        ImageResponseDto dto = imageService.saveImageInfo(image, imageRequestDto);
+        ImageResponseDto dto = imageService.upload(image, imageRequestDto);
         return ResponseEntity.ok(ApiResponse.success("이미지가 업로드 되었습니다.",dto));
     }
 

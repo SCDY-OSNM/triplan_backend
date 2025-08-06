@@ -52,3 +52,6 @@ cloud:
       static: ${AWS_REGION}
     stack:
       auto: false
+
+imageSize:
+  MAX_FILE_SIZE: 5242880
