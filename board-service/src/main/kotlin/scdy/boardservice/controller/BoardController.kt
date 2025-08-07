@@ -9,12 +9,19 @@ import scdy.boardservice.dto.BoardLikeResponseDto
 import scdy.boardservice.dto.BoardRequestDto
 import scdy.boardservice.dto.BoardResponseDto
 import scdy.boardservice.dto.BoardUpdateRequestDto
+import scdy.boardservice.elasticsearch.BoardDocument
 import scdy.boardservice.enums.BoardCategory
+import scdy.boardservice.service.BoardLikeService
 import scdy.boardservice.service.BoardService
+import scdy.boardservice.service.SearchService
 
 @RestController
 @RequestMapping("api/v1/boards")
-class BoardController(private val boardService: BoardService) {
+class BoardController(
+    private val boardService: BoardService,
+    private val boardLikeService: BoardLikeService,
+    private val searchService: SearchService,
+) {
 
     //게시글 생성
     @PostMapping()
@@ -91,7 +98,7 @@ class BoardController(private val boardService: BoardService) {
                   @PathVariable boardId: Long
     ): ResponseEntity<ApiResponse<BoardLikeResponseDto>> {
 
-        val boardLikeResponseDto = boardService.likeBoard(boardId, userId)
+        val boardLikeResponseDto = boardLikeService.likeBoard(boardId, userId)
 
         return ResponseEntity.ok(ApiResponse.success("좋아요 성공", boardLikeResponseDto ))
     }
@@ -101,7 +108,7 @@ class BoardController(private val boardService: BoardService) {
                    @PathVariable boardId: Long
     ): ResponseEntity<ApiResponse<Unit>> {
 
-        boardService.cancelLikeBoard(boardId, userId)
+        boardLikeService.cancelLikeBoard(boardId, userId)
 
         return ResponseEntity.ok(ApiResponse.success("좋아요 취소 성공"))
     }
@@ -109,14 +116,15 @@ class BoardController(private val boardService: BoardService) {
     @GetMapping("/{boardId}/likes")
     fun getNumOfLikes(@PathVariable boardId: Long): ResponseEntity<ApiResponse<Int>> {
 
-        val numOfLikes = boardService.getNumOfBoardLikes(boardId)
+        val numOfLikes = boardLikeService.getNumOfBoardLikes(boardId)
 
         return ResponseEntity.ok(ApiResponse.success("좋아요 개수 조회 성공", numOfLikes))
     }
 
     @GetMapping("/search/title")
     fun searchByTitle(@RequestParam("q", defaultValue = "") title: String,
-                      pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+                      pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
 
         val boardPage = boardService.searchByTitle(title, pageable)
 
@@ -125,7 +133,8 @@ class BoardController(private val boardService: BoardService) {
 
     @GetMapping("/search/contents")
     fun searchByContents(@RequestParam("q", defaultValue = "") contents: String,
-                         pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+                         pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
 
         val boardPage = boardService.searchByContents(contents, pageable)
 
@@ -133,12 +142,60 @@ class BoardController(private val boardService: BoardService) {
     }
 
     @GetMapping("/search/hashtag")
-    fun searchByHashtag(@RequestParam("q", defaultValue = "") hashTag: String,
-                        pageable: Pageable): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+    fun searchByHashtag(
+        @RequestParam("q", defaultValue = "") hashTag: String,
+        pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
 
         val boardPage = boardService.searchByHashTag(hashTag, pageable)
 
         return ResponseEntity.ok(ApiResponse.success("해시태그로 검색 성공", boardPage))
+    }
+
+
+    @GetMapping("/essearch/title")
+    fun EsSearchByTitle(
+        @RequestParam("q", defaultValue = "") title: String,
+        pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsTitle(title, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("제목으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/essearch/contents")
+    fun EsSearchByContents(
+        @RequestParam("q", defaultValue = "") contents: String,
+        pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsContents(contents, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("내용으로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/essearch/hashtag")
+    fun EsSearchByHashtag(
+        @RequestParam("q", defaultValue = "") hashTag: String,
+        pageable: Pageable
+    ): ResponseEntity<ApiResponse<Page<BoardResponseDto>>> {
+
+        val boardPage = boardService.searchByEsHashtag(hashTag, pageable)
+
+        return ResponseEntity.ok(ApiResponse.success("해시태그로 검색 성공", boardPage))
+    }
+
+    @GetMapping("/popular/recent")
+    fun getPopularBoardByRecent(
+        @RequestParam(defaultValue = "5") topN: Int,
+        @RequestParam(defaultValue = "60") recentDurationMinutes: Long,
+        pageable: Pageable
+    ): ResponseEntity<ApiResponse<List<BoardDocument>>>{
+
+        val popularBoard = searchService.getPopularInLastHour()
+
+        return ResponseEntity.ok(ApiResponse.success("최신 인기 게시글 검색 성공", popularBoard))
     }
 
 }

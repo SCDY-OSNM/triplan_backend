@@ -71,6 +71,19 @@ dependencies {
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
+    // Elasticsearch 의존성
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.12")
+    implementation("co.elastic.clients:elasticsearch-java:8.17.3")
+
+
+    //S3 의존성
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+
+
 }
 
 
