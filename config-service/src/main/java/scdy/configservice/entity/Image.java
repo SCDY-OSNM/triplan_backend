@@ -28,6 +28,9 @@ public class Image {
     private String imageUrl;
 
     @Column(nullable = false)
+    private String s3Key;
+
+    @Column(nullable = false)
     private int imageSize;
 
     @Builder
@@ -36,12 +39,14 @@ public class Image {
                  Long boardId,
                  Long contentsId,
                  String imageUrl,
+                 String s3Key,
                  int imageSize) {
         this.imageType = imageType;
         this.userId = userId;
         this.boardId = boardId;
         this.contentsId = contentsId;
         this.imageUrl = imageUrl;
+        this.s3Key = s3Key;
         this.imageSize = imageSize;
     }
 

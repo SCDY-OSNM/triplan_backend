@@ -3,21 +3,29 @@ package scdy.configservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import scdy.configservice.Exception.ImageNotFoundException;
 import scdy.configservice.Exception.S3Exception;
 import scdy.configservice.Exception.S3keyDuplicatedException;
 import scdy.configservice.dto.ImageRequestDto;
 import scdy.configservice.dto.ImageResponseDto;
+import scdy.configservice.entity.Image;
+import scdy.configservice.repository.ImageRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class ImageService {
 
+    private final ImageRepository imageRepository;
     private final S3ImageService s3ImageService;
     private final ImageValidationService imageValidationService;
     private final ImageInfoService imageInfoService;
@@ -26,7 +34,7 @@ public class ImageService {
     private static final int MAX_RETRY_COUNT = 3;
 
 
-    //이미지 저장 로직
+//이미지 저장 로직
     public ImageResponseDto upload(MultipartFile image, ImageRequestDto imageRequestDto) {
 
         //이미지 검증
@@ -38,7 +46,7 @@ public class ImageService {
         String s3Url = uploadToS3WithRetry(image, s3Key);
 
         //이미지 정보 업로드
-        return imageInfoService.saveImageInfo(image, imageRequestDto, s3Url);
+        return imageInfoService.saveImageInfo(image, imageRequestDto, s3Url, s3Key);
     }
 
 
@@ -138,9 +146,118 @@ public class ImageService {
         );
     }
 
+
+    //사용자 프로필 이미지 조회
+    @Transactional(readOnly = true)
+    public ImageResponseDto getUserProfile(Long userId){
+
+        Image image = imageRepository.findByUserId(userId).orElseThrow(
+                () -> new ImageNotFoundException("존재하지 않는 이미지입니다."));
+
+        return ImageResponseDto.from(image);
+    }
+
+    // 이미지 엔티티 리스트를 DTO 리스트로 변환하는 공통 로직
+    private List<ImageResponseDto> toImageResponseDtoList(List<Image> imageList) {
+
+        return imageList.stream()
+                .map(ImageResponseDto::from)
+                .toList();
+    }
+
+    // 게시글 별 이미지 목록 조회
+    @Transactional(readOnly = true)
+    public List<ImageResponseDto> getImagesByBoardId(Long boardId) {
+
+        List<Image> imageList = imageRepository.findAllByBoardId(boardId);
+
+        return toImageResponseDtoList(imageList);
+    }
+
+    // 콘텐츠 별 이미지 목록 조회
+    @Transactional(readOnly = true)
+    public List<ImageResponseDto> getImagesByContentsId(Long contentsId) {
+
+        List<Image> imageList = imageRepository.findAllByContentsId(contentsId);
+
+        return toImageResponseDtoList(imageList);
+    }
+
+
+//이미지 삭제
     //이미지 삭제 시 정합성(DB 먼저 삭제 후 s3에서 삭제.)
+    //단일 이미지 삭제
+    public void deleteImageById(Long imageId) {
+
+        Image image = imageRepository.findById(imageId).orElseThrow(() -> new ImageNotFoundException("존재하지 않는 이미지"));
+        String s3Key = image.getS3Key();
+
+        //DB에서 이미지 삭제
+        imageInfoService.deleteImageInfo(imageId);
+        log.info("DB에서 이미지 정보 삭제 완료. s3Key: {}", s3Key);
+
+        //S3에서 이미지 삭제
+        try{
+            s3ImageService.deleteImageFromS3(s3Key);
+            log.info("S3에서 이미지 파일 삭제 성공. s3Key: {}", s3Key);
+        }catch (Exception e){
+            s3ImageService.saveDeleteErrorLog(s3Key);
+        }
+    }
 
 
-    //(S3 삭제 실패 시 주기적 검사로 처리)
+    //복수 이미지 삭제(게시글 및 콘텐츠)
+
+    // 게시글 ID로 다중 이미지 삭제
+    @Transactional
+    public void deleteImagesByBoardId(Long boardId) {
+
+        List<Image> imagesToDelete = imageRepository.findAllByBoardId(boardId);
+
+        if (imagesToDelete.isEmpty()) {
+            log.info("게시글 ID {}에 연결된 이미지가 없어 삭제를 건너뜁니다.", boardId);
+            return;
+        }
+
+        deleteImagesAndHandleS3(imagesToDelete, "게시글", boardId);
+    }
+
+    // 콘텐츠 ID로 다중 이미지 삭제
+    @Transactional
+    public void deleteImagesByContentsId(Long contentsId) {
+
+        List<Image> imagesToDelete = imageRepository.findAllByContentsId(contentsId);
+
+        if (imagesToDelete.isEmpty()) {
+            log.info("콘텐츠 ID {}에 연결된 이미지가 없어 삭제를 건너뜁니다.", contentsId);
+            return;
+        }
+
+        deleteImagesAndHandleS3(imagesToDelete, "콘텐츠", contentsId);
+    }
+
+    private void deleteImagesAndHandleS3(List<Image> images, String type, Long id) {
+
+        //이미지 정보 삭제
+        List<String> s3Keys = images.stream()
+                .map(Image::getS3Key)
+                .toList();
+
+        imageRepository.deleteAllInBatch(images);
+        log.info("DB에서 {} ID {}의 이미지 {}개 정보 삭제 완료.", type, id, images.size());
+
+        // S3에서 이미지 파일 삭제
+        for (String s3Key : s3Keys) {
+            try {
+                s3ImageService.deleteImageFromS3(s3Key);
+                log.info("S3에서 이미지 파일 삭제 성공. s3Key: {}", s3Key);
+            } catch (Exception e) {
+                log.error("S3에서 이미지 파일 삭제 실패. s3Key: {}: {}", s3Key, e.getMessage());
+                s3ImageService.saveDeleteErrorLog(s3Key);
+            }
+        }
+    }
+
+    //TODO:(S3 삭제 실패 시 주기적 검사로 처리)
 
 }

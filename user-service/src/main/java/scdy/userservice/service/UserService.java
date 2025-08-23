@@ -32,6 +32,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDto signUp(UserRequestDto userRequestDto) {
+
         if(userRepository.existsByEmail(userRequestDto.getEmail())) {
             throw new DuplicateUserException("이미 가입된 유저입니다.");
         }
@@ -49,8 +50,8 @@ public class UserService {
         return UserResponseDto.from(user);
     }
 
-    @Transactional
     public String login(UserRequestDto userRequestDto) {
+
         User user = userRepository.findByEmail(userRequestDto.getEmail())
                 .orElseThrow(()->new UserNotFoundException("유저를 찾을 수 없습니다."));
 
@@ -71,6 +72,7 @@ public class UserService {
     }
 
     public String logout(String accessToken) {
+
         String email = jwtUtils.getUserIdFromToken(accessToken);
         // 리프레시 토큰 삭제
         redisTemplate.delete("RT:" + email);
@@ -90,6 +92,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDto updateUser(Long userId,UserRequestDto userRequestDto) {
+
         String newPassword = null;
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new UserNotFoundException("유저를 찾을수 없습니다."));
@@ -107,7 +110,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long userId, String password) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new PasswordNotMatchException("유저를 찾을수 없습니다"));
+                .orElseThrow(()->new UserNotFoundException("유저를 찾을수 없습니다"));
         if(!passwordEncoder.matches(password,user.getPassword())){
             throw new PasswordNotMatchException("비밀번호가 일치 하지않습니다.");
         }
@@ -123,11 +126,13 @@ public class UserService {
 
     @Cacheable(value = "userById", key = "#id", cacheManager = "redisCacheManager")
     public UserResponseDto findById(Long userId) {
+
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다"));
         return UserResponseDto.from(user);
     }
 
     public List<UserResponseDto> findAll() {
+
         List<User> users = userRepository.findAll();
 
         // User 엔티티 리스트를 UserResponseDto 리스트로 변환
@@ -135,6 +140,5 @@ public class UserService {
                 .map(UserResponseDto::from) // UserResponseDto.from(User user) 메서드 사용
                 .toList();
     }
-
 
 }
