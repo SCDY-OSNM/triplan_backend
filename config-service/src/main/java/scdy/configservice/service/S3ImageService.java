@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import scdy.configservice.Exception.FileSizeOverException;
 import scdy.configservice.Exception.S3Exception;
+import scdy.configservice.entity.DeletedImageLog;
+import scdy.configservice.repository.DeletedImageLogRepository;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,8 +36,8 @@ import java.util.UUID;
 @Service
 public class S3ImageService {
 
-    //TODO: 고아객체 검증 추가
     private final AmazonS3 amazonS3;
+    private final DeletedImageLogRepository deletedImageLogRepository;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
@@ -88,10 +90,10 @@ public class S3ImageService {
     }
 
     //이미지 삭제
-    public void deleteImageFromS3(String imageAddress){
-        String key = getKeyFromImageAddress(imageAddress);
+    public void deleteImageFromS3(String s3Key){
+
         try{
-            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
         }catch (Exception e){
             throw new S3Exception("이미지 삭제 실패");
         }
@@ -99,6 +101,7 @@ public class S3ImageService {
 
 
     private String getKeyFromImageAddress(String imageAddress){
+
         try{
             URL url = new URL(imageAddress);
             String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
@@ -109,6 +112,7 @@ public class S3ImageService {
     }
 
     public boolean doesImageExist(String S3Key){
+
         try{
             return amazonS3.doesObjectExist(bucketName, S3Key);
         }catch (Exception e){
@@ -116,5 +120,15 @@ public class S3ImageService {
             throw new S3Exception("S3 연결 오류 발생");
         }
     }
+
+    //이미지 삭제 오류 로그 저장
+    @Transactional
+    public void saveDeleteErrorLog(String S3Key){
+
+        DeletedImageLog deletedImageLog = new DeletedImageLog(S3Key);
+        deletedImageLogRepository.save(deletedImageLog);
+    }
+
+
 
 }

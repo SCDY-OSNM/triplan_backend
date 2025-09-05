@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import scdy.configservice.Exception.ImageNotFoundException;
 import scdy.configservice.Exception.S3Exception;
 import scdy.configservice.dto.ImageRequestDto;
 import scdy.configservice.dto.ImageResponseDto;
@@ -21,7 +22,7 @@ public class ImageInfoService {
 
     //이미지 정보 저장 로직
     @Transactional
-    public ImageResponseDto saveImageInfo(MultipartFile image, ImageRequestDto imageRequestDto, String s3Url) {
+    public ImageResponseDto saveImageInfo(MultipartFile image, ImageRequestDto imageRequestDto, String s3Url, String s3Key) {
 
         Image imageEntity = null;
 
@@ -31,6 +32,7 @@ public class ImageInfoService {
             imageEntity = Image.builder()
                     .imageType(imageRequestDto.getImageType())
                     .imageUrl(s3Url)
+                    .s3Key(s3Key)
                     .imageSize((int)image.getSize())
                     .userId(imageRequestDto.getUserId())
                     .boardId(imageRequestDto.getBoardId())
@@ -53,6 +55,15 @@ public class ImageInfoService {
         }
 
         return ImageResponseDto.from(imageEntity);
+    }
+
+
+    //이미지 정보 삭제 로직
+    @Transactional
+    public void deleteImageInfo(Long imageId){
+
+        Image image = imageRepository.findById(imageId).orElseThrow(() -> new ImageNotFoundException("존재하지 않는 이미지"));
+        imageRepository.delete(image);
     }
 
 }
